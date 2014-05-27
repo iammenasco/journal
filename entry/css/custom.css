@@ -1,0 +1,124 @@
+/*
+
+Custom Changes to the pure-main.css
+Edited by Brian Menasco
+Last Updated: May 24th 2014
+
+*/
+
+.name {
+	color: #368DDA;
+}
+body {
+	color: #fff;
+	text-shadow: 0 2px 3px rgba(0,0,0,1);
+	background: #202020; 
+	-webkit-background-size: cover;
+	-moz-background-size: cover;
+	-o-background-size: cover;
+	background-size: cover;
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+.pure-button,
+.pure-button:hover,
+.pure-button:focus {
+	text-shadow: none; /* Prevent inheritence from `body` */
+	background-color: #fff;
+	border: 1px solid #fff;
+	font-weight: bold;
+	font-size: 18px;
+	border-radius: 6px;
+}
+.outline-inverse {
+	color: #fff;
+	background-color: transparent;
+	border-color: #368DDA
+}
+
+.outline-inverse:hover, .btn-outline-inverse:focus, .btn-outline-inverse:active {
+	color: #368DDA;
+	text-shadow: none;
+	background-color: #fff;
+	border-color: #fff;
+	font-size: 18px;
+}
+.lead {
+	font-size: 21px;
+}
+.home-heading {
+	text-align: center;
+}
+.construction {
+	margin-top: 20%;
+	margin-bottom: 20%;
+}
+.lead {
+	text-align: center;
+}
+.header {
+	color: white;
+	border-bottom: 1px solid #368DDA;
+}
+.main, .signIn {
+	text-align: center;
+	height: auto;
+	max-width: 650px;
+	margin-left: auto;
+	margin-right: auto;
+}
+.signIn {
+	margin-top: 10%;
+	margin-bottom: 10%;
+}
+.signUp {
+	margin-right: 5%;
+	margin-top: 2%;
+}
+.pure-form-aligned .pure-controls {
+	margin: 0;
+}
+.pure-form input:not([type]):focus,
+.pure-form input[type=password]:focus {
+	border-color: #368DDA;
+	outline: 0;
+	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px #368DDA;
+	box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px #368DDA;
+}
+#menu {
+	background: black;
+}
+.mastfoot {
+	color: rgba(255,255,255,.5);
+	position: relative;
+	bottom: 0;
+	letter-spacing: 0;
+	border-top: 1px solid #368DDA;
+	margin-bottom: 2%;
+}
+.mastfoot .inner {
+	font-size: 14px;
+	text-align: center;
+}
+.mastfoot > .inner > p > a:hover {
+	color: #368DDA;
+}
+.mastfoot > .inner > a:hover {
+	color: #368DDA;
+}
+a {
+	color: #ccc;
+}
+.tab-content > .tab-pane {
+  display: none;
+}
+.tab-content > .active {
+  display: block;
+}
+.menu-select {
+	margin-left: 6px;
+	text-shadow: none; /* Prevent inheritence from `body` */
+	background-color:  black;
+	font-size: 18px;
+	border-radius: 6px;
+	color: #999;
+}

@@ -1,0 +1,50 @@
+.name {
+	color: yellow;
+}
+.outline-inverse {
+	border-color: yellow
+}
+
+.outline-inverse:hover, .btn-outline-inverse:focus, .btn-outline-inverse:active {
+	color: yellow;
+}
+.entry-item {
+	border-bottom: 1px solid yellow;
+}
+.entry-item-unread {
+	border-left: 6px solid yellow;
+}
+.entryList {
+	border-right: 1px solid yellow;
+}
+#menu .pure-menu ul,
+#menu .pure-menu .menu-item-divided {
+	border-top: 1px solid yellow;
+}
+#menu .pure-menu-selected{
+	border-left: 5px solid yellow;
+}
+.pure-menu .pure-menu-heading {
+	border-bottom-color: yellow;
+}
+.entry-content-header {
+	border-bottom: 1px solid yellow;
+}
+.mastfoot {
+	border-top: 1px solid yellow;
+}
+.header {
+	border-bottom: 1px solid yellow;
+}
+.mastfoot > .inner > p > a:hover {
+	color: yellow;
+}
+.mastfoot > .inner > a:hover {
+	color: yellow;
+}
+.pure-form input:not([type]):focus,
+.pure-form input[type=password]:focus {
+	border-color: yellow;
+	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px yellow;
+	box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px yellow;
+}

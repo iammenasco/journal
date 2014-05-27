@@ -1,0 +1,52 @@
+.name {
+	color: #368DDA;
+}
+body {
+	color: #fff;
+	text-shadow: 0 2px 3px rgba(0,0,0,1);
+	background: url(../images/baby2.jpg) no-repeat center center fixed; 
+	-webkit-background-size: cover;
+	-moz-background-size: cover;
+	-o-background-size: cover;
+	background-size: cover;
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+.pure-button,
+.pure-button:hover,
+.pure-button:focus {
+	text-shadow: none; /* Prevent inheritence from `body` */
+	background-color: #fff;
+	border: 1px solid #fff;
+	font-weight: bold;
+	font-size: 18px;
+	border-radius: 6px;
+}
+.outline-inverse {
+	color: #fff;
+	background-color: transparent;
+	border-color: #368DDA
+}
+
+.outline-inverse:hover, .btn-outline-inverse:focus, .btn-outline-inverse:active {
+	color: #368DDA;
+	text-shadow: none;
+	background-color: #fff;
+	border-color: #fff;
+	font-size: 18px;
+}
+p {
+	font-size: 21px;
+}
+.home-heading {
+	text-align: center;
+	margin-top: 30%;
+}
+.lead {
+	text-align: center;
+}
+.header {
+	color: white;
+}
+.main {
+	height: auto;
+}

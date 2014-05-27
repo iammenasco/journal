@@ -1,0 +1,50 @@
+.name {
+	color: orangered;
+}
+.outline-inverse {
+	border-color: orangered
+}
+
+.outline-inverse:hover, .btn-outline-inverse:focus, .btn-outline-inverse:active {
+	color: orangered;
+}
+.entry-item {
+	border-bottom: 1px solid orangered;
+}
+.entry-item-unread {
+	border-left: 6px solid orangered;
+}
+.entryList {
+	border-right: 1px solid orangered;
+}
+#menu .pure-menu ul,
+#menu .pure-menu .menu-item-divided {
+	border-top: 1px solid orangered;
+}
+#menu .pure-menu-selected{
+	border-left: 5px solid orangered;
+}
+.pure-menu .pure-menu-heading {
+	border-bottom-color: orangered;
+}
+.entry-content-header {
+	border-bottom: 1px solid orangered;
+}
+.mastfoot {
+	border-top: 1px solid orangered;
+}
+.header {
+	border-bottom: 1px solid orangered;
+}
+.mastfoot > .inner > p > a:hover {
+	color: orangered;
+}
+.mastfoot > .inner > a:hover {
+	color: orangered;
+}
+.pure-form input:not([type]):focus,
+.pure-form input[type=password]:focus {
+	border-color: orangered;
+	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px orangered;
+	box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px orangered;
+}
