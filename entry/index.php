@@ -98,55 +98,47 @@ if (isset($_POST['action'])) {
 		// Check Results
 		if ($insertResult) {
 			
-		} else {
-			$message = "$firstName, you totally messed up. You made an error, and nothing happened.";
 		}
 	} else if ($_POST['action'] == 'newEntry') {
 		$title = testInput($_POST['title']);
-		$entry = testInput($_POST['entry']);
+		$content = testInput($_POST['content']);
 		// Validate the data
 
 		// Check for errors, handle it!
 
 		// Write data to database
-		$insertResult = newEntry($userID, $title, $entry);
+		$insertResult = newEntry($userID, $title, $content);
 		// Check Results
 		if ($insertResult) {
 			header('Location: /site/?page=entries');
-		} else {
-			$message = "$firstName, you totally messed up. You made an error, and nothing happened.";
 		}
 	} else if ($_POST['action'] == 'updateEntry') {
 		$title = testInput($_POST['title']);
-		$entry = testInput($_POST['entry']);
+		$content = testInput($_POST['content']);
 		$entryID = testInput($_POST['entryID']);
 		// Validate the data
 
 		// Check for errors, handle it!
 
 		// Write data to database
-		$insertResult = updateEntry($userID, $entryID, $title, $entry);
+		$insertResult = updateEntry($userID, $entryID, $title, $content);
 		// Check Results
 		if ($insertResult) {
-			header('Location: /site/?page=entries');
-		} else {
-			$message = "$firstName, you totally messed up. You made an error, and nothing happened.";
+			header('Location: site/?page=entries');
 		}
 	} else if ($_POST['action'] == 'delete') {
 		$title = testInput($_POST['title']);
-		$entry = testInput($_POST['entry']);
+		$content = testInput($_POST['content']);
 		$entryID = testInput($_POST['entryID']);
 		// Validate the data
 
 		// Check for errors, handle it!
 
 		// Write data to database
-		$insertResult = deleteEntry($userID, $entryID, $title, $entry);
+		$insertResult = deleteEntry($userID, $entryID, $title, $content);
 		// Check Results
 		if ($insertResult) {
 			header('Location: /site/?page=entries');
-		} else {
-			$message = "$firstName, you totally messed up. You made an error, and nothing happened.";
 		}
 	}
 }
@@ -281,23 +273,23 @@ function entryList($user, $entries, $avatar) {
 	$list = '';
 	$i = 0;
 	foreach ($entries as $entry) {
-		if (strlen($entry['entriesTitle']) > 27) {
-			$entrySubject = substr($entry['entriesTitle'], 0, 27) . '...';
+		if (strlen($entry['entryTitle']) > 27) {
+			$title = substr($entry['entryTitle'], 0, 27) . '...';
 		} else {
-			$entrySubject = $entry['entriesTitle'];
+			$title = $entry['entryTitle'];
 		}
-		if (strlen($entry['entriesContent']) > 75) {
-			$entrySnip = substr($entry['entriesContent'], 0, 75) . '...';
+		if (strlen($entry['entryContent']) > 75) {
+			$snip = substr($entry['entryContent'], 0, 75) . '...';
 		} else {
-			$entrySnip = $entry['entriesContent'];
+			$snip = $entry['entryContent'];
 		}
-		$id = 'entry' . $entry['entriesID'];
+		$id = 'entry' . $entry['entryID'];
 		if ($i == 0) {
 			$active = ' active';
 		} else {
 			$active = '';
 		}
-		$entryName = entryName($entry['entriesCreatedBy']);
+		$name = entryName($entry['entryCreatedBy']);
 		$list .= <<<HTML
 	<li class="{$active}"><a href="#{$id}" data-toggle="tab">
 		<div class="entry-item pure-g">
@@ -305,9 +297,9 @@ function entryList($user, $entries, $avatar) {
 				{$avatar}
 			</div>
 			<div class="pure-u-3-4">
-				<h5 class="entry-name">{$entryName[0]['userFirstName']} {$entryName[0]['userLastName']}</h5>
-				<h4 class="entry-subject">{$entrySubject}</h4>
-				<p class="entry-desc">{$entrySnip}</p>
+				<h5 class="entry-name">{$name[0]['userFirstName']} {$name[0]['userLastName']}</h5>
+				<h4 class="entry-subject">{$title}</h4>
+				<p class="entry-desc">{$snip}</p>
 			</div>
 		</div>
 	</a></li>
@@ -338,31 +330,31 @@ function entryContent($user, $entries, $footer) {
 	$list = '';
 	$i = 0;
 	foreach ($entries as $entry) {
-		$entrySubject = $entry['entriesTitle'];
-		$entryTime = date("g:ia, F jS, Y",strtotime($entry['entriesTime']));
-		$entryContent = $entry['entriesContent'];
-		$id = 'entry' . $entry['entriesID'];
+		$subject = $entry['entryTitle'];
+		$time = date("g:ia, F jS, Y",strtotime($entry['entryTime']));
+		$content = $entry['entryContent'];
+		$id = 'entry' . $entry['entryID'];
 		if ($i == 0) {
 			$active = ' active';
 		} else {
 			$active = '';
 		}
-		$entryName = entryName($entry['entriesCreatedBy']);
+		$name = entryName($entry['entryCreatedBy']);
 		$list .= <<<HTML
 	<div class="entry-content tab-pane {$active}" id="{$id}">
 		<div class="entry-content-header pure-g">
 			<div class="pure-u-1-2">
-				<h1 class="entry-content-title">{$entrySubject}</h1>
-				<p class="entry-content-subtitle">From <a>{$entryName[0]['userFirstName']} {$entryName[0]['userLastName']}</a> at <span>{$entryTime}</span>
+				<h1 class="entry-content-title">{$subject}</h1>
+				<p class="entry-content-subtitle">From <a>{$name[0]['userFirstName']} {$name[0]['userLastName']}</a> at <span>{$time}</span>
 				</p>
 			</div>
 			<div class="entry-content-controls pure-u-1-2">
 				<a href="?page=new" class="pure-button outline-inverse">New</a>
-				<a href="?page=new&entry={$entry['entriesID']}" class="pure-button outline-inverse">Edit</a>
-				<a href="?page=delete&entry={$entry['entriesID']}" class="pure-button outline-inverse">Delete</a>
+				<a href="?page=new&entry={$entry['entryID']}" class="pure-button outline-inverse">Edit</a>
+				<a href="?page=delete&entry={$entry['entryID']}" class="pure-button outline-inverse">Delete</a>
 			</div>
 		</div>
-		<div class="entry-content-body">{$entryContent}</div>
+		<div class="entry-content-body">{$content}</div>
 		{$footer}
 	</div>
 HTML;
@@ -376,18 +368,24 @@ Create entry content
 
 /**** START ****
 New/Edit Entry
+
+This function will do one of two things. First, for creating a new entry, it will currently just show a title box, and a text area. The timestamp, userID, and entryID will all be created behind the scenes during insert.
+
+TODO:
+Use a similar view as the Entries List. The List will be selectable templates, and the main area will be where you make your changes and edits to the form.
+
 ****************/
 function createEntry ($user, $footer) {
 	if(isset($_GET['entry'])) {
 		$id = $_GET['entry'];
 		$entry = listSingle($user, $id);
-		$title = $entry[0]['entriesTitle'];
-		$entry = $entry[0]['entriesContent'];
+		$title = $entry[0]['entryTitle'];
+		$content = $entry[0]['entryContent'];
 		$value = 'updateEntry';
 	} else {
 		$id = '';
 		$title = '';
-		$entry = '';
+		$content = '';
 		$value = 'newEntry';
 	}
 	return <<<HTML
@@ -404,7 +402,7 @@ function createEntry ($user, $footer) {
 				</div>
 				<div class="pure-control-group">
 					<label for="entry">Entry</label>
-					<textarea id="entry" rows="15" cols="50" placeholder="Entry" name="entry">{$entry}</textarea>
+					<textarea id="content" rows="15" cols="50" placeholder="Content" name="content">{$content}</textarea>
 				</div>
 			</fieldset>
 			<div class="pure-controls">
@@ -430,8 +428,8 @@ function createDelete($user, $footer) {
 	if(isset($_GET['entry'])) {
 		$id = $_GET['entry'];
 		$entry = listSingle($user, $id);
-		$title = $entry[0]['entriesTitle'];
-		$entry = $entry[0]['entriesContent'];
+		$title = $entry[0]['entryTitle'];
+		$content = $entry[0]['entryContent'];
 	}
 	return <<<HTML
 	<div class="main">
@@ -445,7 +443,7 @@ function createDelete($user, $footer) {
 				<p class="lead">This can not be undone. Please dont cry if everything blows up.</p>
 				<form class="pure-form pure-form-stacked" action="." method="post">
 				<input type="hidden" name="title" value="{$title}">
-				<input type="hidden" name="entry" value="{$entry}">
+				<input type="hidden" name="content" value="{$content}">
 				<input type="hidden" name="entryID" value="{$id}">
 				<button type="submit" name="action" value="delete" class="pure-button outline-inverse">Yes</button>
 				<a href="?page=entries" class="pure-button outline-inverse">No</a>

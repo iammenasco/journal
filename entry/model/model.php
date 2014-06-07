@@ -28,15 +28,15 @@ function registerUser($firstName, $lastName, $email, $password) {
 	}
 }
 
-function newEntry($user, $title, $content) {
+function newEntry($userID, $title, $content) {
 	$con = con();
 	$sql = 
-	'INSERT INTO entries (entriesCreatedBy, entriesTitle, entriesContent)
-	VALUES (:entriesCreatedBy, :entriesTitle, :entriesContent);';
+	'INSERT INTO entries (entryCreatedBy, entryTitle, entryContent)
+	VALUES (:entryCreatedBy, :entryTitle, :entryContent);';
 	$stmt = $con->prepare($sql);
-	$stmt->bindParam(':entriesCreatedBy', $user);
-	$stmt->bindParam(':entriesTitle', $title);
-	$stmt->bindParam(':entriesContent', $content);
+	$stmt->bindParam(':entryCreatedBy', $userID);
+	$stmt->bindParam(':entryTitle', $title);
+	$stmt->bindParam(':entryContent', $content);
 	$stmt->execute();
 	$insertResult = $con->lastInsertId();
 	$stmt->closeCursor();
@@ -48,18 +48,18 @@ function newEntry($user, $title, $content) {
 	}
 }
 
-function updateEntry($user, $entry, $title, $content) {
+function updateEntry($userID, $entryID, $title, $content) {
 	$con = con();
 	$sql = 
 	'UPDATE entries 
-		SET entriesTitle = :entriesTitle, entriesContent = :entriesContent
-			WHERE entriesCreatedBy = :entriesCreatedBy
-			AND entriesID = :entriesID;';
+		SET entryTitle = :entryTitle, entryContent = :entryContent
+			WHERE entryCreatedBy = :entryCreatedBy
+			AND entryID = :entryID;';
 	$stmt = $con->prepare($sql);
-	$stmt->bindParam(':entriesCreatedBy', $user);
-	$stmt->bindParam(':entriesID', $entry);
-	$stmt->bindParam(':entriesTitle', $title);
-	$stmt->bindParam(':entriesContent', $content);
+	$stmt->bindParam(':entryCreatedBy', $userID);
+	$stmt->bindParam(':entryID', $entryID);
+	$stmt->bindParam(':entryTitle', $title);
+	$stmt->bindParam(':entryContent', $content);
 	$stmt->execute();
 	$insertResult = $con->lastInsertId();
 	$stmt->closeCursor();
@@ -71,19 +71,19 @@ function updateEntry($user, $entry, $title, $content) {
 	}
 }
 
-function deleteEntry($user, $entry, $title, $content) {
+function deleteEntry($userID, $entryID, $title, $content) {
 	$con = con();
 	$sql = 
 	'DELETE FROM entries 
-		WHERE entriesCreatedBy = :entriesCreatedBy
-		AND entriesID = :entriesID;
-		AND entriesTitle = :entriesTitle
-		AND entriesContent = :entriesContent;';
+		WHERE entryCreatedBy = :entryCreatedBy
+		AND entryID = :entryID;
+		AND entryTitle = :entryTitle
+		AND entryContent = :entryContent;';
 	$stmt = $con->prepare($sql);
-	$stmt->bindParam(':entriesCreatedBy', $user);
-	$stmt->bindParam(':entriesID', $entry);
-	$stmt->bindParam(':entriesTitle', $title);
-	$stmt->bindParam(':entriesContent', $content);
+	$stmt->bindParam(':entryCreatedBy', $userID);
+	$stmt->bindParam(':entryID', $entryID);
+	$stmt->bindParam(':entryTitle', $title);
+	$stmt->bindParam(':entryContent', $content);
 	$stmt->execute();
 	$insertResult = $con->lastInsertId();
 	$stmt->closeCursor();
@@ -95,26 +95,26 @@ function deleteEntry($user, $entry, $title, $content) {
 	}
 }
 
-function listAll($user) {
+function listAll($userID) {
 	$con = con();
 	$query = 'SELECT * FROM entries
-				WHERE entriesCreatedBy = :entriesCreatedBy;';
+				WHERE entryCreatedBy = :entryCreatedBy;';
 	$stmt = $con->prepare($query);
-	$stmt->bindParam(':entriesCreatedBy', $user);
+	$stmt->bindParam(':entryCreatedBy', $userID);
 	$stmt->execute();
 	$result = $stmt->fetchAll();
 	$stmt->closeCursor();
 	return $result;
 }
 
-function listSingle($user, $entry) {
+function listSingle($userID, $entryID) {
 	$con = con();
 	$query = 'SELECT * FROM entries
-				WHERE entriesCreatedBy = :entriesCreatedBy
-				AND entriesID = :entriesID;';
+				WHERE entryCreatedBy = :entryCreatedBy
+				AND entryID = :entryID;';
 	$stmt = $con->prepare($query);
-	$stmt->bindParam(':entriesCreatedBy', $user);
-	$stmt->bindParam(':entriesID', $entry);
+	$stmt->bindParam(':entryCreatedBy', $userID);
+	$stmt->bindParam(':entryID', $entryID);
 	$stmt->execute();
 	$result = $stmt->fetchAll();
 	$stmt->closeCursor();
@@ -138,10 +138,10 @@ function entryName($entryID) {
 	$query = 'SELECT users.userFirstName, users.userLastName
 	FROM users
 	INNER JOIN entries
-	ON users.userID = entries.entriesCreatedBy
-	WHERE entriesCreatedBy=:entriesCreatedBy;';
+	ON users.userID = entries.entryCreatedBy
+	WHERE entryCreatedBy=:entryCreatedBy;';
 	$stmt = $con->prepare($query);
-	$stmt->bindParam(':entriesCreatedBy', $entryID);
+	$stmt->bindParam(':entryCreatedBy', $entryID);
 	$stmt->execute();
 	$result = $stmt->fetchAll();
 	$stmt->closeCursor();
