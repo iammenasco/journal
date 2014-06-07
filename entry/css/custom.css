@@ -122,3 +122,8 @@ a {
 	border-radius: 6px;
 	color: #999;
 }
+.newEntry {
+	margin-top: 5%;
+	margin-bottom: 5%;
+	text-align: left;
+}

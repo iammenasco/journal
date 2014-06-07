@@ -49,36 +49,128 @@ Test Content
 
 The following content is used as dummy content to test the functions found on this page.
 ****************/
-$email = "menasco@me.com";
-
-// Create function to render the entry List on load, and then load the content when clicked.
-
-$entryID = 'entry' . '1';
-$entrySubject = 'Read this to keep you safe.';
-// First X characters from entry body
-$entrySnip = 'Lets talk. There are some features I would like to point... ';
-$entryTime = '1:29pm, May 24th, 2014';
-$entryContent = <<<HTML
-<p>Lets talk. There are some features I would like to point out since I worked my butt of making it possible. First off, you might have recognized that the site you are now using is responsive. Second, each of the three parts of the screen scroll separately. Why is this awesome? Well, how often are you going to need to scroll the Left Navigation? Never, if I do my job right. But lets say you have 80 entries. You can scroll those willy nilly, while the content on the right (this box) stays in one place. You can happily do whatever you want. Happy?</p>
-<p>Not yet, huh? There is more. Personally, I like the blue. I call it Menasco blue. <span class="name">#368DDA</span>, feels like home. You can change it if you want. I built a drop down selection of various themes on the left. I gave it some colors that look beautiful.</p>
-<p>Still reading? If you are adventurous, you might have noticed that some things dont work. Thats intentional. This is just a basic mock-up of what I want it to look like. The first two items on the left will change what you see in this box. The other ones wont, because I am too lazy. Also, you might recognize the blue line on the side of the second entry. I am thinking about flagging entries like that if someone comments or shares or does something special with it.</p>
-<p>Let me know what you think so far.</p>
-HTML;
-$loggedIn = isset($_GET['loggedIn']);
-if (isset($_GET['view'])) {
-	$view = $_GET['view'];
-} else {
-	$view = '';
-}
-// $loggedIn = true;
-$lastName = 'Menasco';
-$firstName = 'Brian';
-$entryName = $firstName . ' ' . $lastName;
 $alertCount = 2;
-$userID = 1;
+$loggedIn = false;
+function testInput($data) {
+  $data = stripslashes($data);
+  $data = htmlspecialchars($data);
+  return $data;
+}
 /************
 Test Content
 **** END ****/
+
+if (is_readable('model/model.php')) {
+	require 'model/model.php';
+} else {
+	header('location: /errordocs/500.php');
+}
+if(isset($_GET['page'])) {
+	$view = $_GET['page'];
+} else {
+	$view = 'home';
+}
+
+$user = currentUser('1');
+$firstName = $user[0]['userFirstName'];
+$lastName = $user[0]['userLastName'];
+$fullName = $firstName . ' ' . $lastName;
+$email = $user[0]['userEmail'];
+$color = $user[0]['userColor'];
+$userID = $user[0]['userID'];
+
+$nav = createNav($loggedIn, $lastName, $alertCount, $view);
+$footer = createFooter();
+
+if (isset($_POST['action'])) {
+	if ($_POST['action'] == 'register') {
+		$firstName = testInput($_POST['firstName']);
+		$lastName = testInput($_POST['lastName']);
+		$email = testInput($_POST['email']);
+		$password = testInput($_POST['password']);
+		$password2 = testInput($_POST['password2']);
+		// Validate the data
+
+		// Check for errors, handle it!
+
+		// Write data to database
+		$insertResult = registerUser($firstName, $lastName, $email, md5($password));
+		// Check Results
+		if ($insertResult) {
+			
+		} else {
+			$message = "$firstName, you totally messed up. You made an error, and nothing happened.";
+		}
+	} else if ($_POST['action'] == 'newEntry') {
+		$title = testInput($_POST['title']);
+		$entry = testInput($_POST['entry']);
+		// Validate the data
+
+		// Check for errors, handle it!
+
+		// Write data to database
+		$insertResult = newEntry($userID, $title, $entry);
+		// Check Results
+		if ($insertResult) {
+			header('Location: /site/?page=entries');
+		} else {
+			$message = "$firstName, you totally messed up. You made an error, and nothing happened.";
+		}
+	} else if ($_POST['action'] == 'updateEntry') {
+		$title = testInput($_POST['title']);
+		$entry = testInput($_POST['entry']);
+		$entryID = testInput($_POST['entryID']);
+		// Validate the data
+
+		// Check for errors, handle it!
+
+		// Write data to database
+		$insertResult = updateEntry($userID, $entryID, $title, $entry);
+		// Check Results
+		if ($insertResult) {
+			header('Location: /site/?page=entries');
+		} else {
+			$message = "$firstName, you totally messed up. You made an error, and nothing happened.";
+		}
+	} else if ($_POST['action'] == 'delete') {
+		$title = testInput($_POST['title']);
+		$entry = testInput($_POST['entry']);
+		$entryID = testInput($_POST['entryID']);
+		// Validate the data
+
+		// Check for errors, handle it!
+
+		// Write data to database
+		$insertResult = deleteEntry($userID, $entryID, $title, $entry);
+		// Check Results
+		if ($insertResult) {
+			header('Location: /site/?page=entries');
+		} else {
+			$message = "$firstName, you totally messed up. You made an error, and nothing happened.";
+		}
+	}
+}
+if(isset($_GET['page'])) {
+	if ($_GET['page'] == 'signUp') {
+		$body = createSignUp($footer);
+	} else if ($_GET['page'] == 'signIn') {
+		$body = createSignIn($footer);
+	} else if ($_GET['page'] == 'entries') {
+		$avatar = getAvatar($fullName ,$email);
+		$entries = listAll($userID);
+		$body = '<div class="pure-g">';
+		$body .= '<ul class="pure-1 entryList nav-tabs">';
+		$body .= entryList($userID, $entries, $avatar);
+		$body .= '</ul><div class="pure-1 entry tab-content">';
+		$body .= entryContent($userID, $entries, $footer);
+		$body .= '</div>';
+	} else if ($_GET['page'] == 'new') {
+		$body = createEntry($userID, $footer);
+	} else if ($_GET['page'] == 'delete')
+		$body = createDelete($userID, $footer);
+} else {
+	$body = createHome($footer);
+}
 
 /**** START ****
 Create nav
@@ -101,59 +193,63 @@ Admin - CMS Stuff
 Log out - Keep at the bottom?
 Theme - Dropdown color selector/changing thing
 ****************/
-function createNav($loggedIn, $lastName, $alertCount) {
-	$userItems = '';
+function createNav($loggedIn, $lastName, $alertCount, $view) {
 	if ($loggedIn) {
-		$userItems = <<<HTML
+		$userItems = '
 			<li class="pure-menu-heading">Journals</li>
-			<li><a href="#">New Entry</a></li>
-			<li><a href="#">Alerts <span class="name entry-count">{$alertCount}</span></a></li>
-			<li><a href="#">Families</a></li>
-			<li><a href="#">Share</a></li>
+			<li class="' . active($view, 'new') . '"><a href="#">New Entry</a></li>
+			<li class="' . active($view, 'alerts') . '"><a href="#">Alerts <span class="name entry-count">{$alertCount}</span></a></li>
+			<li class="' . active($view, 'families') . '"><a href="#">Families</a></li>
+			<li class="' . active($view, 'share') . '"><a href="#">Share</a></li>
 			<li class="pure-menu-heading">Account</li>
-			<li><a href="#">Switch Journal</a></li>
-			<li><a href="#">Edit Journal</a></li>
+			<li class="' . active($view, 'switch') . '"><a href="#">Switch Journal</a></li>
+			<li class="' . active($view, 'editJournal') . '"><a href="#">Edit Journal</a></li>
 			<li class="pure-menu-heading"></li>
-			<li><a class="pure-menu-heading" href="?view=home">Log out</a></li>
-			<li><a href="#">Admin</a></li>
-HTML;
+			<li class="' . active($view, 'logOut') . '"><a class="pure-menu-heading" href="?view=home">Log out</a></li>
+			<li class="' . active($view, 'admin') . '"><a href="#">Admin</a></li>';
 } else {
-	$userItems = <<<HTML
+	$userItems = '
 	<li class="pure-menu-heading"></li>
-	<li><a class="pure-menu-heading" href="?view=signIn">Log in</a></li>
-HTML;
+	<li class="' . active($view, 'signIn') . '"><a href="?page=signIn">Log in</a></li>
+	<li class="' . active($view, 'signUp') . '"><a href="?page=signUp">Sign Up</a></li>';
 }
-	return <<<HTML
-	
-		<a href="#menu" id="menuLink" class="menu-link">
-			<span></span>
-		</a>
-		<div id="menu">
-			<div class="pure-menu pure-menu-open">
-				<a class="pure-menu-heading" href="http://iammenasco.com">I am <span class="name">{$lastName}</span>.</a>
-				<ul id="std-menu-items">
-					<li class="menu-item-divided pure-menu-selected"><a href="#">Home</a></li>
-					<li><a href="#">About</a></li>
-					<li><a href="#">Features</a></li>
-					<li><a href="#">Support</a></li>
-					{$userItems}
-					<li><select class="menu-select" onChange="loadCSS(this.value);">
-				<option selected="selected" disabled="disabled">Theme</option>
-				<option value="blue">Blue</option>
-				<option value="lime">Green</option>
-				<option value="orange">Orange</option>
-				<option value="pink">Pink</option>
-				<option value="purple">Purple</option>
-				<option value="red">Red</option>
-				<option value="white">White</option>
-				<option value="yellow">Yellow</option>
+	return '
+<a href="#menu" id="menuLink" class="menu-link">
+	<span></span>
+</a>
+<div id="menu">
+	<div class="pure-menu pure-menu-open">
+		<a class="pure-menu-heading" href="/site">I am <span class="name">' .  $lastName . '</span>.</a>
+		<ul id="std-menu-items">
+			<li class="menu-item-divided' . active($view, 'entries') . '"><a href="?page=entries">Entries</a></li>
+			<li class="' . active($view, 'about') . '"><a href="#">About</a></li>
+			<li class="' . active($view, 'features') . '"><a href="#">Features</a></li>
+			<li class="' . active($view, 'support') . '"><a href="#">Support</a></li>'
+			. $userItems .
+			'<li>
+				<select class="menu-select" onChange="loadCSS(this.value);">
+					<option selected="selected" disabled="disabled">Theme</option>
+					<option value="blue">Blue</option>
+					<option value="lime">Green</option>
+					<option value="orange">Orange</option>
+					<option value="pink">Pink</option>
+					<option value="purple">Purple</option>
+					<option value="red">Red</option>
+					<option value="white">White</option>
+					<option value="yellow">Yellow</option>
 				</select>
 			</li>
-				</ul>
-			</div>
-		</div>
-	
-HTML;
+		</ul>
+	</div>
+</div>';
+}
+
+function active($view, $page) {
+	if($view == $page) {
+		return ' pure-menu-selected';
+	} else {
+	return '';
+}
 }
 /************
 Create nav
@@ -164,11 +260,11 @@ Get avatar
 
 Use Gravatar. Maybe just as an option. Users can opt-out, but use this service as default
 ****************/
-function getAvatar($entryName, $email) {
+function getAvatar($fullName, $email) {
 	$default = "http://www.gravatar.com/avatar/c8c1467507a042f49ab30024e6e7f6d9?s=64";
 	$url = "http://www.gravatar.com/avatar/" . md5( strtolower( trim( $email ) ) ) . "?d=" . urlencode( $default ) . "&s=64";
 	return <<<HTML
-	<img class="entry-avatar" alt="{$entryName}&#x27;s avatar" height="64" width="64" src="{$url}">
+	<img class="entry-avatar" alt="{$fullName}&#x27;s avatar" height="64" width="64" src="{$url}">
 HTML;
 }
 /************
@@ -181,34 +277,44 @@ Create entry list
 Populate a list of 10 most current entries with "Show More" button, or Lazy Load all in Desktop View
 ****************/
 
-function entryList($entryID, $entryName, $avatar, $entrySubject, $entrySnip) {
-	return <<<HTML
-	<li class="active"><a href="#entry1" data-toggle="tab">
+function entryList($user, $entries, $avatar) {
+	$list = '';
+	$i = 0;
+	foreach ($entries as $entry) {
+		if (strlen($entry['entriesTitle']) > 27) {
+			$entrySubject = substr($entry['entriesTitle'], 0, 27) . '...';
+		} else {
+			$entrySubject = $entry['entriesTitle'];
+		}
+		if (strlen($entry['entriesContent']) > 75) {
+			$entrySnip = substr($entry['entriesContent'], 0, 75) . '...';
+		} else {
+			$entrySnip = $entry['entriesContent'];
+		}
+		$id = 'entry' . $entry['entriesID'];
+		if ($i == 0) {
+			$active = ' active';
+		} else {
+			$active = '';
+		}
+		$entryName = entryName($entry['entriesCreatedBy']);
+		$list .= <<<HTML
+	<li class="{$active}"><a href="#{$id}" data-toggle="tab">
 		<div class="entry-item pure-g">
 			<div class="pure-u">
 				{$avatar}
 			</div>
 			<div class="pure-u-3-4">
-				<h5 class="entry-name">{$entryName}</h5>
-				<h4 class="entry-subject">{$entrySubject}</h4>
-				<p class="entry-desc">{$entrySnip}</p>
-			</div>
-		</div>
-	</a></li>
-
-	<li><a href="#entry2" data-toggle="tab">
-		<div class="entry-item entry-item-unread pure-g">
-			<div class="pure-u">
-				{$avatar}
-			</div>
-			<div class="pure-u-3-4">
-				<h5 class="entry-name">{$entryName}</h5>
+				<h5 class="entry-name">{$entryName[0]['userFirstName']} {$entryName[0]['userLastName']}</h5>
 				<h4 class="entry-subject">{$entrySubject}</h4>
 				<p class="entry-desc">{$entrySnip}</p>
 			</div>
 		</div>
 	</a></li>
 HTML;
+		$i++;
+	}
+	return $list;
 }
 /************
 Create entry List
@@ -228,45 +334,132 @@ Possibilities for new entry templates(When the user clicks new)
 		Fields can include location of bug (like a URL or something) screen shot, replication steps or whatever.
 
 ****************/
-function entryContent($entryID, $entrySubject, $entryName, $entryTime, $entryContent, $footer) {
-	return <<<HTML
-	<div class="entry-content tab-pane active" id="entry1">
+function entryContent($user, $entries, $footer) {
+	$list = '';
+	$i = 0;
+	foreach ($entries as $entry) {
+		$entrySubject = $entry['entriesTitle'];
+		$entryTime = date("g:ia, F jS, Y",strtotime($entry['entriesTime']));
+		$entryContent = $entry['entriesContent'];
+		$id = 'entry' . $entry['entriesID'];
+		if ($i == 0) {
+			$active = ' active';
+		} else {
+			$active = '';
+		}
+		$entryName = entryName($entry['entriesCreatedBy']);
+		$list .= <<<HTML
+	<div class="entry-content tab-pane {$active}" id="{$id}">
 		<div class="entry-content-header pure-g">
 			<div class="pure-u-1-2">
 				<h1 class="entry-content-title">{$entrySubject}</h1>
-				<p class="entry-content-subtitle">From <a>{$entryName}</a> at <span>{$entryTime}</span>
+				<p class="entry-content-subtitle">From <a>{$entryName[0]['userFirstName']} {$entryName[0]['userLastName']}</a> at <span>{$entryTime}</span>
 				</p>
 			</div>
 			<div class="entry-content-controls pure-u-1-2">
-				<button class="pure-button outline-inverse">Edit</button>
-				<button class="pure-button outline-inverse">New</button>
-				<button class="pure-button outline-inverse">Share</button>
-			</div>
-		</div>
-		<div class="entry-content-body">{$entryContent}</div>
-		{$footer}
-	</div>
-
-	<div class="entry-content tab-pane" id="entry2">
-		<div class="entry-content-header pure-g">
-			<div class="pure-u-1-2">
-				<h1 class="entry-content-title">{$entrySubject}</h1>
-				<p class="entry-content-subtitle">From <a>{$entryName}</a> at <span>{$entryTime}</span>
-				</p>
-			</div>
-			<div class="entry-content-controls pure-u-1-2">
-				<button class="pure-button outline-inverse">Edit?</button>
-				<button class="pure-button outline-inverse">New</button>
-				<button class="pure-button outline-inverse">Share</button>
+				<a href="?page=new" class="pure-button outline-inverse">New</a>
+				<a href="?page=new&entry={$entry['entriesID']}" class="pure-button outline-inverse">Edit</a>
+				<a href="?page=delete&entry={$entry['entriesID']}" class="pure-button outline-inverse">Delete</a>
 			</div>
 		</div>
 		<div class="entry-content-body">{$entryContent}</div>
 		{$footer}
 	</div>
 HTML;
+		$i++;
+	}
+return $list;
 }
 /************
 Create entry content
+**** END ****/
+
+/**** START ****
+New/Edit Entry
+****************/
+function createEntry ($user, $footer) {
+	if(isset($_GET['entry'])) {
+		$id = $_GET['entry'];
+		$entry = listSingle($user, $id);
+		$title = $entry[0]['entriesTitle'];
+		$entry = $entry[0]['entriesContent'];
+		$value = 'updateEntry';
+	} else {
+		$id = '';
+		$title = '';
+		$entry = '';
+		$value = 'newEntry';
+	}
+	return <<<HTML
+	<div class="main">
+		<div class="header">
+			<h1>I am <span class="name">Menasco</span>.</h1>
+			<h2>A magical place of hope and wonder</h2>
+		</div>
+		<form class="pure-form pure-form-stacked newEntry" action="." method="post">
+			<fieldset>
+				<div class="pure-control-group">
+					<label for="title">Title</label>
+					<textarea id="title" rows="1" cols="50" placeholder="Title" name="title">{$title}</textarea>
+				</div>
+				<div class="pure-control-group">
+					<label for="entry">Entry</label>
+					<textarea id="entry" rows="15" cols="50" placeholder="Entry" name="entry">{$entry}</textarea>
+				</div>
+			</fieldset>
+			<div class="pure-controls">
+			<input type="hidden" name="entryID" value="{$id}">
+				<button type="submit" name="action" value="{$value}" class="pure-button outline-inverse">Submit</button>
+			</div>
+		</form>
+			<div class="pure-u-1">
+				{$footer}
+			</div>
+		</div>
+	</div>
+HTML;
+}
+/************
+New/Edit Entry
+**** END ****/
+
+/**** START ****
+Delete Entry
+****************/
+function createDelete($user, $footer) {
+	if(isset($_GET['entry'])) {
+		$id = $_GET['entry'];
+		$entry = listSingle($user, $id);
+		$title = $entry[0]['entriesTitle'];
+		$entry = $entry[0]['entriesContent'];
+	}
+	return <<<HTML
+	<div class="main">
+		<div class="header">
+			<h1>I am <span class="name">Menasco</span>.</h1>
+			<h2>A magical place of hope and wonder</h2>
+		</div>
+		<div class="pure-g">
+			<div class="pure-u-1 construction">
+				<h1 class="home-heading">Are you sure you want to delete<br><span class="name">{$title}?</span>.</h1>
+				<p class="lead">This can not be undone. Please dont cry if everything blows up.</p>
+				<form class="pure-form pure-form-stacked" action="." method="post">
+				<input type="hidden" name="title" value="{$title}">
+				<input type="hidden" name="entry" value="{$entry}">
+				<input type="hidden" name="entryID" value="{$id}">
+				<button type="submit" name="action" value="delete" class="pure-button outline-inverse">Yes</button>
+				<a href="?page=entries" class="pure-button outline-inverse">No</a>
+				</form>
+			</div>
+			<div class="pure-u-1">
+				{$footer}
+			</div>
+		</div>
+	</div>
+HTML;
+}
+/************
+Delete Entry
 **** END ****/
 
 /**** START ****
@@ -321,7 +514,8 @@ function createSignIn($footer) {
 				<label for="cb" class="pure-checkbox">
 					<input id="cb" type="checkbox" class="remember"> Will you remember me?
 				</label>
-				<button type="signUp" class="pure-button outline-inverse signUp">Sign up</button>
+				<a href="./?page=signUp" class="pure-button outline-inverse signUp">Sign Up
+				</a>
 				<button type="submit" class="pure-button outline-inverse">Submit</button>
 			</div>
 		</form>
@@ -345,33 +539,33 @@ function createSignUp($footer) {
 			<h1>I am <span class="name">Menasco</span>.</h1>
 			<h2>A magical place of hope and wonder</h2>
 		</div>
-		<form class="pure-form pure-form-aligned signIn">
+		<form class="pure-form pure-form-aligned signIn" action="." method="post">
 			<fieldset>
 				<div class="pure-control-group">
 					<label for="firstName">First Name</label>
-					<input id="firstName" placeholder="First Name">
+					<input id="firstName" placeholder="First Name" name="firstName">
 				</div>
 				<div class="pure-control-group">
 					<label for="lastName">Last Name</label>
-					<input id="lastName"  placeholder="Last Name">
+					<input id="lastName"  placeholder="Last Name" name="lastName">
 				</div>
 			</fieldset>
 			<fieldset>
 				<div class="pure-control-group">
 					<label for="email">Email Address</label>
-					<input id="email" placeholder="Email Address">
+					<input id="email" placeholder="Email Address" name="email">
 				</div>
 				<div class="pure-control-group">
 					<label for="password">Password</label>
-					<input id="password" type="password" placeholder="Password">
+					<input id="password" type="password" placeholder="Password" name="password">
 				</div>
 				<div class="pure-control-group">
 					<label for="password2">Repeat</label>
-					<input id="password2" type="password" placeholder="Password">
+					<input id="password2" type="password" placeholder="Password" name="password2">
 				</div>
 			</fieldset>
 			<div class="pure-controls">
-				<button type="signUp" class="pure-button outline-inverse signUp">Sign up</button>
+				<button type="submit" name="action" value="register" class="pure-button outline-inverse signUp">Submit</button>
 			</div>
 		</form>
 		<div class="pure-u-1">
@@ -405,18 +599,7 @@ Footer
 /**** START ****
 Testing view
 ****************/
-$nav = createNav($loggedIn, $lastName, $alertCount);
-$footer = createFooter();
-$avatar = getAvatar($entryName ,$email);
-$home = createHome($footer);
-$signIn = createSignIn($footer);
-$signUp = createSignUp($footer);
-$body = '<div class="pure-g">';
-$body .= '<ul class="pure-1 entryList nav-tabs">';
-$body .= entryList($entryID, $entryName, $avatar, $entrySubject, $entrySnip);
-$body .= '</ul><div class="pure-1 entry tab-content">';
-$body .= entryContent($entryID, $entrySubject, $entryName, $entryTime, $entryContent, $footer);
-$body .= '</div>';
+
 /************
 Testing view
 **** END ****/

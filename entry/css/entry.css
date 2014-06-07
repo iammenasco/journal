@@ -246,7 +246,7 @@ ul>.active {
         right: 0;
         bottom: 0;
         overflow: auto;
-        width: auto; /* so that it's not 100% */
+        width: 100%
     }
 
 }
