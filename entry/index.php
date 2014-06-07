@@ -102,12 +102,16 @@ if (isset($_POST['action'])) {
 	} else if ($_POST['action'] == 'newEntry') {
 		$title = testInput($_POST['title']);
 		$content = testInput($_POST['content']);
+		$url = testInput($_POST['url']);
+		$start = testInput($_POST['start']);
+		$end = testInput($_POST['end']);
+		$templateID = testInput($_POST['templateID']);
 		// Validate the data
 
 		// Check for errors, handle it!
 
 		// Write data to database
-		$insertResult = newEntry($userID, $title, $content);
+		$insertResult = newEntry($userID, $title, $content, $url, $start, $end, $templateID);
 		// Check Results
 		if ($insertResult) {
 			header('Location: /site/?page=entries');
@@ -115,13 +119,17 @@ if (isset($_POST['action'])) {
 	} else if ($_POST['action'] == 'updateEntry') {
 		$title = testInput($_POST['title']);
 		$content = testInput($_POST['content']);
+		$url = testInput($_POST['url']);
+		$start = testInput($_POST['start']);
+		$end = testInput($_POST['end']);
 		$entryID = testInput($_POST['entryID']);
+		$templateID = testInput($_POST['templateID']);
 		// Validate the data
 
 		// Check for errors, handle it!
 
 		// Write data to database
-		$insertResult = updateEntry($userID, $entryID, $title, $content);
+		$insertResult = updateEntry($userID, $entryID, $title, $content, $url, $start, $end, $templateID);
 		// Check Results
 		if ($insertResult) {
 			header('Location: site/?page=entries');
@@ -150,14 +158,18 @@ if(isset($_GET['page'])) {
 	} else if ($_GET['page'] == 'entries') {
 		$avatar = getAvatar($fullName ,$email);
 		$entries = listAll($userID);
-		$body = '<div class="pure-g">';
-		$body .= '<ul class="pure-1 entryList nav-tabs">';
+		$body = '<div class="pure-g"><ul class="pure-1 entryList nav-tabs">';
 		$body .= entryList($userID, $entries, $avatar);
 		$body .= '</ul><div class="pure-1 entry tab-content">';
 		$body .= entryContent($userID, $entries, $footer);
 		$body .= '</div>';
 	} else if ($_GET['page'] == 'new') {
-		$body = createEntry($userID, $footer);
+		$templates = getTemplates();
+		$body = '<div class="pure-g"><ul class="pure-1 entryList nav-tabs">';
+		$body .= createNewList($userID, $templates);
+		$body .= '</ul><div class="pure-1 entry tab-content">';
+		$body .= createNewEntry($userID, $templates, $footer);
+		$body .= '</div>';
 	} else if ($_GET['page'] == 'delete')
 		$body = createDelete($userID, $footer);
 } else {
@@ -367,55 +379,140 @@ Create entry content
 **** END ****/
 
 /**** START ****
+New/Edit List
+****************/
+function createNewList($user, $templates) {
+	$list = '';
+	$i = 0;
+	foreach ($templates as $template) {
+		$title = $template['templateTitle'];
+		$snip = $template['templateDescription'];
+		$id = 'template' . $template['templateID'];
+		if ($i == 0) {
+			$active = ' active';
+		} else {
+			$active = '';
+		}
+		$list .= <<<HTML
+		<li class="{$active}"><a href="#{$id}" data-toggle="tab">
+			<div class="entry-item pure-g">
+				<div class="pure-u-3-4">
+					<h4 class="entry-subject">{$title}</h4>
+					<p class="entry-desc">{$snip}</p>
+				</div>
+			</div>
+		</a></li>
+HTML;
+	$i++;
+	}
+	return $list;
+}
+/************
+New/Edit List
+**** END ****/
+
+/**** START ****
 New/Edit Entry
 
-This function will do one of two things. First, for creating a new entry, it will currently just show a title box, and a text area. The timestamp, userID, and entryID will all be created behind the scenes during insert.
-
-TODO:
-Use a similar view as the Entries List. The List will be selectable templates, and the main area will be where you make your changes and edits to the form.
+Create a new entry or edit an existing one. Depending on the template, the view will display other things, each item needs to see if it should be included within the template.
 
 ****************/
-function createEntry ($user, $footer) {
+function createNewEntry($userID, $templates, $footer) {
+	$list = '';
+	$i = 0;
 	if(isset($_GET['entry'])) {
-		$id = $_GET['entry'];
-		$entry = listSingle($user, $id);
-		$title = $entry[0]['entryTitle'];
-		$content = $entry[0]['entryContent'];
+		$entryID = $_GET['entry'];
+		$entry = listSingle($userID, $entryID);
+		$entryTitle = $entry[0]['entryTitle'];
+		$entryContent = $entry[0]['entryContent'];
+		$displayTime = date("g:ia, F jS, Y",strtotime($entry[0]['entryTime']));
+		$entryURL = $entry[0]['entryURL'];
+		$entryStartTime = $entry[0]['entryStartTime'];
+		$entryEndTime = $entry[0]['entryEndTime'];
 		$value = 'updateEntry';
 	} else {
-		$id = '';
-		$title = '';
-		$content = '';
+		$entryID = '';
+		$entryTitle = '';
+		$entryContent = '';
+		$displayTime = date("g:ia, F jS, Y", time());
+		$entryURL = '';
+		$entryStartTime = '';
+		$entryEndTime = '';
 		$value = 'newEntry';
 	}
-	return <<<HTML
-	<div class="main">
-		<div class="header">
-			<h1>I am <span class="name">Menasco</span>.</h1>
-			<h2>A magical place of hope and wonder</h2>
+	$name = entryName($userID);
+	foreach ($templates as $template) {
+		if ($template['templateEntryTitle'] == 1) {
+			$title = '<label for="title">Title</label><textarea id="title" rows="1" placeholder="Title" name="title">' . $entryTitle .'</textarea>';
+		} else {
+			$title = '<input type="hidden" name="title" value="' . $entryTitle .'">';
+		}
+
+		if ($template['templateTime'] == 1) {
+			$time = $displayTime;
+		} else {
+			$time = '';
+		}
+
+		if ($template['templateContent'] == 1) {
+			$content = '<label for="entry">Entry</label>
+			<textarea id="entry" rows="15" cols="50" placeholder="Entry" name="content">' . $entryContent . '</textarea>';
+		} else {
+			$content = '<input type="hidden" name="content" value="' . $entryContent . '">';
+		}
+
+		if ($template['templateURL'] == 1) {
+			$url = '<label for="url">URL</label><textarea id="url" rows="1" cols="50" placeholder="URL" name="url">' . $entryURL .'</textarea>';
+		} else {
+			$url = '<input type="hidden" name="url" value="' . $entryURL . '">';
+		}
+
+		if ($template['templateStartTime'] == 1) {
+			$start = '<label for="start">Start Time</label><textarea id="start" rows="1" cols="50" placeholder="Start Time" name="start">' . $entryStartTime .'</textarea>';
+		} else {
+			$start = '<input type="hidden" name="start" value="' . $entryStartTime . '">';
+		}
+
+		if ($template['templateEndTime'] == 1) {
+			$end = '<label for="end">URL</label><textarea id="end" rows="1" cols="50" placeholder="End Time" name="end">' . $entryEndTime .'</textarea>';
+		} else {
+			$end = '<input type="hidden" name="end" value="' . $entryEndTime . '">';
+		}
+		// $file = $template['templateFile'];
+		$templateID = 'template' . $template['templateID'];
+		if ($i == 0) {
+			$active = ' active';
+		} else {
+			$active = '';
+		}
+		$list .='
+<div class="entry-content tab-pane' . $active . '" id="' . $templateID . '">
+	<form class="pure-form pure-form-stacked newEntry" action="." method="post">
+	<input type="hidden" name="entryID" value="' . $entryID . '">
+	<input type="hidden" name="templateID" value="' . $template['templateID'] . '">
+	<div class="entry-content-header pure-g">
+		<div class="pure-u-1-2">
+			<div class="pure-control-group">
+				' . $title . '
+			</div>
+			<p class="entry-content-subtitle">Created At <span>' . $time . '</span>
+			</p>
 		</div>
-		<form class="pure-form pure-form-stacked newEntry" action="." method="post">
-			<fieldset>
-				<div class="pure-control-group">
-					<label for="title">Title</label>
-					<textarea id="title" rows="1" cols="50" placeholder="Title" name="title">{$title}</textarea>
-				</div>
-				<div class="pure-control-group">
-					<label for="entry">Entry</label>
-					<textarea id="content" rows="15" cols="50" placeholder="Content" name="content">{$content}</textarea>
-				</div>
-			</fieldset>
-			<div class="pure-controls">
-			<input type="hidden" name="entryID" value="{$id}">
-				<button type="submit" name="action" value="{$value}" class="pure-button outline-inverse">Submit</button>
-			</div>
-		</form>
-			<div class="pure-u-1">
-				{$footer}
-			</div>
+		<div class="entry-content-controls pure-u-1-2">
+			<button type="submit" name="action" value="' . $value . '" class="pure-button outline-inverse">Submit</button>
 		</div>
 	</div>
-HTML;
+	<div class="entry-content-body">
+		<div class="pure-control-group">
+			' . $start . $end . $url . $content . '
+		</div>
+	</div>
+	</form>
+	' . $footer . '
+</div>';
+	$i++;
+	}
+	return $list;
 }
 /************
 New/Edit Entry

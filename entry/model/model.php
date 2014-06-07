@@ -28,15 +28,19 @@ function registerUser($firstName, $lastName, $email, $password) {
 	}
 }
 
-function newEntry($userID, $title, $content) {
+function newEntry($userID, $title, $content, $url, $start, $end, $templateID) {
 	$con = con();
 	$sql = 
-	'INSERT INTO entries (entryCreatedBy, entryTitle, entryContent)
-	VALUES (:entryCreatedBy, :entryTitle, :entryContent);';
+	'INSERT INTO entries (entryCreatedBy,entryTitle, entryContent, entryURL, entryStartTime, entryEndTime, entryTemplateID)
+	VALUES (:entryCreatedBy, :entryTitle, :entryContent, :entryURL, :entryStartTime, :entryEndTime, :entryTemplateID);';
 	$stmt = $con->prepare($sql);
 	$stmt->bindParam(':entryCreatedBy', $userID);
 	$stmt->bindParam(':entryTitle', $title);
 	$stmt->bindParam(':entryContent', $content);
+	$stmt->bindParam(':entryURL', $url);
+	$stmt->bindParam(':entryStartTime', $start);
+	$stmt->bindParam(':entryEndTime', $end);
+	$stmt->bindParam(':entryTemplateID', $templateID);
 	$stmt->execute();
 	$insertResult = $con->lastInsertId();
 	$stmt->closeCursor();
@@ -48,11 +52,11 @@ function newEntry($userID, $title, $content) {
 	}
 }
 
-function updateEntry($userID, $entryID, $title, $content) {
+function updateEntry($userID, $entryID, $title, $content, $url, $start, $end, $templateID) {
 	$con = con();
 	$sql = 
 	'UPDATE entries 
-		SET entryTitle = :entryTitle, entryContent = :entryContent
+		SET entryTitle = :entryTitle, entryContent = :entryContent, entryURL = :entryURL, entryStartTime = :entryStartTime, entryEndTime = :entryEndTime, entryTemplateID = :entryTemplateID
 			WHERE entryCreatedBy = :entryCreatedBy
 			AND entryID = :entryID;';
 	$stmt = $con->prepare($sql);
@@ -60,6 +64,10 @@ function updateEntry($userID, $entryID, $title, $content) {
 	$stmt->bindParam(':entryID', $entryID);
 	$stmt->bindParam(':entryTitle', $title);
 	$stmt->bindParam(':entryContent', $content);
+	$stmt->bindParam(':entryURL', $url);
+	$stmt->bindParam(':entryStartTime', $start);
+	$stmt->bindParam(':entryEndTime', $end);
+	$stmt->bindParam(':entryTemplateID', $templateID);
 	$stmt->execute();
 	$insertResult = $con->lastInsertId();
 	$stmt->closeCursor();
@@ -98,7 +106,8 @@ function deleteEntry($userID, $entryID, $title, $content) {
 function listAll($userID) {
 	$con = con();
 	$query = 'SELECT * FROM entries
-				WHERE entryCreatedBy = :entryCreatedBy;';
+				WHERE entryCreatedBy = :entryCreatedBy
+				ORDER BY entryTime DESC;';
 	$stmt = $con->prepare($query);
 	$stmt->bindParam(':entryCreatedBy', $userID);
 	$stmt->execute();
@@ -142,6 +151,16 @@ function entryName($entryID) {
 	WHERE entryCreatedBy=:entryCreatedBy;';
 	$stmt = $con->prepare($query);
 	$stmt->bindParam(':entryCreatedBy', $entryID);
+	$stmt->execute();
+	$result = $stmt->fetchAll();
+	$stmt->closeCursor();
+	return $result;
+}
+
+function getTemplates() {
+	$con = con();
+	$query = 'SELECT * FROM templates';
+	$stmt = $con->prepare($query);
 	$stmt->execute();
 	$result = $stmt->fetchAll();
 	$stmt->closeCursor();
