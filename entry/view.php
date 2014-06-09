@@ -13,6 +13,7 @@
 	<div id="layout" class="content">
 	<?php echo $nav; ?>
 	<?php echo $body; ?>
+	<?php echo $errors; ?>
 	</div>
 	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 	<script type="text/javascript" src="js/ui.js"></script>

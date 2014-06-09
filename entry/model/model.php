@@ -7,6 +7,19 @@ try {
 	exit;
 }
 
+function logIn($email, $password) {
+	$con = con();
+	$sql = 
+	'SELECT * FROM users WHERE userEmail = :userEmail and userPassword = :userPassword';
+	$stmt = $con->prepare($sql);
+	$stmt->bindParam(':userEmail', $email);
+	$stmt->bindParam(':userPassword', $password);
+	$stmt->execute();
+	$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+	$stmt->closeCursor();
+	return $result;
+}
+
 function registerUser($firstName, $lastName, $email, $password) {
 	$con = con();
 	$sql = 
@@ -14,7 +27,7 @@ function registerUser($firstName, $lastName, $email, $password) {
 	VALUES (:userFirstName, :userLastName, :userEmail, :userPassword);';
 	$stmt = $con->prepare($sql);
 	$stmt->bindParam(':userFirstName', $firstName);
-	$stmt->bindParam(':userLastName', $firstName);
+	$stmt->bindParam(':userLastName', $lastName);
 	$stmt->bindParam(':userEmail', $email);
 	$stmt->bindParam(':userPassword', $password);
 	$stmt->execute();
@@ -111,7 +124,7 @@ function listAll($userID) {
 	$stmt = $con->prepare($query);
 	$stmt->bindParam(':entryCreatedBy', $userID);
 	$stmt->execute();
-	$result = $stmt->fetchAll();
+	$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 	$stmt->closeCursor();
 	return $result;
 }
@@ -125,22 +138,22 @@ function listSingle($userID, $entryID) {
 	$stmt->bindParam(':entryCreatedBy', $userID);
 	$stmt->bindParam(':entryID', $entryID);
 	$stmt->execute();
-	$result = $stmt->fetchAll();
+	$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 	$stmt->closeCursor();
 	return $result;
 }
 
-function currentUser($userID) {
-	$con = con();
-	$query = 'SELECT * FROM users
-				WHERE userID = :userID;';
-	$stmt = $con->prepare($query);
-	$stmt->bindParam(':userID', $userID);
-	$stmt->execute();
-	$result = $stmt->fetchAll();
-	$stmt->closeCursor();
-	return $result;
-}
+// function currentUser($userID) {
+// 	$con = con();
+// 	$query = 'SELECT * FROM users
+// 				WHERE userID = :userID;';
+// 	$stmt = $con->prepare($query);
+// 	$stmt->bindParam(':userID', $userID);
+// 	$stmt->execute();
+// 	$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// 	$stmt->closeCursor();
+// 	return $result;
+// }
 
 function entryName($entryID) {
 	$con = con();
@@ -152,7 +165,7 @@ function entryName($entryID) {
 	$stmt = $con->prepare($query);
 	$stmt->bindParam(':entryCreatedBy', $entryID);
 	$stmt->execute();
-	$result = $stmt->fetchAll();
+	$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 	$stmt->closeCursor();
 	return $result;
 }
@@ -162,7 +175,7 @@ function getTemplates() {
 	$query = 'SELECT * FROM templates';
 	$stmt = $con->prepare($query);
 	$stmt->execute();
-	$result = $stmt->fetchAll();
+	$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 	$stmt->closeCursor();
 	return $result;
 }

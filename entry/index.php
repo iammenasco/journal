@@ -1,4 +1,5 @@
 <?php
+session_start();
 // Created by Brian Menasco
 // This work is licensed under a Creative Commons 
 // Attribution-NonCommercial-ShareAlike 4.0 International License.
@@ -70,15 +71,25 @@ if(isset($_GET['page'])) {
 } else {
 	$view = 'home';
 }
+$errors = '';
+if (isset($_SESSION['loggedIn']) && isset($_SESSION['loggedIn']) == TRUE) {
+	$loggedIn = $_SESSION['loggedIn'];
+	$firstName = $_SESSION['firstName'];
+	$lastName = $_SESSION['lastName'];
+	$fullName = $firstName . ' ' . $lastName;
+	$email = $_SESSION['email'];
+	$color = $_SESSION['color'];
+	$userID = $_SESSION['userID'];
+} else {
+	$firstName = '';
+	$lastName = 'Menasco';
+	$fullName = '';
+	$email = '';
+	$color = '';
+	$userID = '';
+	$loggedIn = FALSE;
 
-$user = currentUser('1');
-$firstName = $user[0]['userFirstName'];
-$lastName = $user[0]['userLastName'];
-$fullName = $firstName . ' ' . $lastName;
-$email = $user[0]['userEmail'];
-$color = $user[0]['userColor'];
-$userID = $user[0]['userID'];
-
+}
 $nav = createNav($loggedIn, $lastName, $alertCount, $view);
 $footer = createFooter();
 
@@ -148,6 +159,27 @@ if (isset($_POST['action'])) {
 		if ($insertResult) {
 			header('Location: /site/?page=entries');
 		}
+	} else if ($_POST['action'] == 'signIn') {
+		$email = testInput($_POST['email']);
+		$password = testInput($_POST['password']);
+		// Validate the data
+
+		// Check for errors, handle it!
+
+		// Write data to database
+		$insertResult = logIn($email, md5($password));
+		// Check Results
+		if ($insertResult) {
+			$_SESSION['loggedIn'] = TRUE;
+			$_SESSION['userID'] = $insertResult[0]['userID'];
+			$_SESSION['lastName'] = $insertResult[0]['userLastName'];
+			$_SESSION['firstName'] = $insertResult[0]['userFirstName'];
+			$_SESSION['email'] = $insertResult[0]['userEmail'];
+			$_SESSION['color'] = $insertResult[0]['userColor'];
+			header('Location: /site/?page=entries');
+		} else {
+			$error = 'Incorrect username or password.';
+		}
 	}
 }
 if(isset($_GET['page'])) {
@@ -170,11 +202,24 @@ if(isset($_GET['page'])) {
 		$body .= '</ul><div class="pure-1 entry tab-content">';
 		$body .= createNewEntry($userID, $templates, $footer);
 		$body .= '</div>';
-	} else if ($_GET['page'] == 'delete')
+	} else if ($_GET['page'] == 'delete') {
 		$body = createDelete($userID, $footer);
-} else {
+	} else if ($_GET['page'] == 'logOut') {
+		$_SESSION['loggedIn'] = FALSE;
+		unset($_SESSION['userID']);
+		unset($_SESSION['lastName']);
+		unset($_SESSION['firstName']);
+		unset($_SESSION['email']);
+		unset($_SESSION['color']);
+		session_destroy();
+		header('Location: /site/');
+		$body = createHome($footer);
+	}
+}
+else {
 	$body = createHome($footer);
 }
+
 
 /**** START ****
 Create nav
@@ -201,15 +246,9 @@ function createNav($loggedIn, $lastName, $alertCount, $view) {
 	if ($loggedIn) {
 		$userItems = '
 			<li class="pure-menu-heading">Journals</li>
-			<li class="' . active($view, 'new') . '"><a href="#">New Entry</a></li>
-			<li class="' . active($view, 'alerts') . '"><a href="#">Alerts <span class="name entry-count">{$alertCount}</span></a></li>
-			<li class="' . active($view, 'families') . '"><a href="#">Families</a></li>
-			<li class="' . active($view, 'share') . '"><a href="#">Share</a></li>
-			<li class="pure-menu-heading">Account</li>
-			<li class="' . active($view, 'switch') . '"><a href="#">Switch Journal</a></li>
-			<li class="' . active($view, 'editJournal') . '"><a href="#">Edit Journal</a></li>
-			<li class="pure-menu-heading"></li>
-			<li class="' . active($view, 'logOut') . '"><a class="pure-menu-heading" href="?view=home">Log out</a></li>
+			<li class="' . active($view, 'entries') . '"><a href="?page=entries">Entries</a></li>
+			<li class="' . active($view, 'logOut') . '"><a href="?page=logOut">Log out</a></li>
+			<li class="' . active($view, 'settings') . '"><a href="#">Settings</a></li>
 			<li class="' . active($view, 'admin') . '"><a href="#">Admin</a></li>';
 } else {
 	$userItems = '
@@ -225,8 +264,7 @@ function createNav($loggedIn, $lastName, $alertCount, $view) {
 	<div class="pure-menu pure-menu-open">
 		<a class="pure-menu-heading" href="/site">I am <span class="name">' .  $lastName . '</span>.</a>
 		<ul id="std-menu-items">
-			<li class="menu-item-divided' . active($view, 'entries') . '"><a href="?page=entries">Entries</a></li>
-			<li class="' . active($view, 'about') . '"><a href="#">About</a></li>
+			<li class="menu-item-divided' . active($view, 'about') . '"><a href="#">About</a></li>
 			<li class="' . active($view, 'features') . '"><a href="#">Features</a></li>
 			<li class="' . active($view, 'support') . '"><a href="#">Support</a></li>'
 			. $userItems .
@@ -266,9 +304,9 @@ Use Gravatar. Maybe just as an option. Users can opt-out, but use this service a
 ****************/
 function getAvatar($fullName, $email) {
 	$default = "http://www.gravatar.com/avatar/c8c1467507a042f49ab30024e6e7f6d9?s=64";
-	$url = "http://www.gravatar.com/avatar/" . md5( strtolower( trim( $email ) ) ) . "?d=" . urlencode( $default ) . "&s=64";
+	$url = "http://www.gravatar.com/avatar/" . md5( strtolower( trim( $email ) ) ) . "?d=" . urlencode( $default ) . "&amp;s=64";
 	return <<<HTML
-	<img class="entry-avatar" alt="{$fullName}&#x27;s avatar" height="64" width="64" src="{$url}">
+	<img class="entry-avatar" alt="{$fullName}&amp;#x27;s avatar" height="64" width="64" src="{$url}">
 HTML;
 }
 /************
@@ -281,7 +319,7 @@ Create entry list
 Populate a list of 10 most current entries with "Show More" button, or Lazy Load all in Desktop View
 ****************/
 
-function entryList($user, $entries, $avatar) {
+function entryList($userID, $entries, $avatar) {
 	$list = '';
 	$i = 0;
 	foreach ($entries as $entry) {
@@ -318,6 +356,16 @@ function entryList($user, $entries, $avatar) {
 HTML;
 		$i++;
 	}
+	$list .= <<<HTML
+	<li>
+		<div class="entry-item pure-g">
+			<div class="pure-u-3-4">
+				<a href="#" class="pure-button outline-inverse">Link</a>
+				<a href="#" class="pure-button outline-inverse">Link</a>
+			</div>
+		</div>
+	</li>
+HTML;
 	return $list;
 }
 /************
@@ -338,7 +386,7 @@ Possibilities for new entry templates(When the user clicks new)
 		Fields can include location of bug (like a URL or something) screen shot, replication steps or whatever.
 
 ****************/
-function entryContent($user, $entries, $footer) {
+function entryContent($userID, $entries, $footer) {
 	$list = '';
 	$i = 0;
 	foreach ($entries as $entry) {
@@ -362,8 +410,8 @@ function entryContent($user, $entries, $footer) {
 			</div>
 			<div class="entry-content-controls pure-u-1-2">
 				<a href="?page=new" class="pure-button outline-inverse">New</a>
-				<a href="?page=new&entry={$entry['entryID']}" class="pure-button outline-inverse">Edit</a>
-				<a href="?page=delete&entry={$entry['entryID']}" class="pure-button outline-inverse">Delete</a>
+				<a href="?page=new&amp;entry={$entry['entryID']}" class="pure-button outline-inverse">Edit</a>
+				<a href="?page=delete&amp;entry={$entry['entryID']}" class="pure-button outline-inverse">Delete</a>
 			</div>
 		</div>
 		<div class="entry-content-body">{$content}</div>
@@ -381,7 +429,7 @@ Create entry content
 /**** START ****
 New/Edit List
 ****************/
-function createNewList($user, $templates) {
+function createNewList($userID, $templates) {
 	$list = '';
 	$i = 0;
 	foreach ($templates as $template) {
@@ -405,6 +453,16 @@ function createNewList($user, $templates) {
 HTML;
 	$i++;
 	}
+	$list .= <<<HTML
+	<li>
+		<div class="entry-item pure-g">
+			<div class="pure-u-3-4">
+				<a href="#" class="pure-button outline-inverse">Link</a>
+				<a href="#" class="pure-button outline-inverse">Link</a>
+			</div>
+		</div>
+	</li>
+HTML;
 	return $list;
 }
 /************
@@ -455,8 +513,7 @@ function createNewEntry($userID, $templates, $footer) {
 		}
 
 		if ($template['templateContent'] == 1) {
-			$content = '<label for="entry">Entry</label>
-			<textarea id="entry" rows="15" cols="50" placeholder="Entry" name="content">' . $entryContent . '</textarea>';
+			$content = '<label for="entry">Entry</label><textarea id="entry" rows="15" cols="50" placeholder="Entry" name="content">' . $entryContent . '</textarea>';
 		} else {
 			$content = '<input type="hidden" name="content" value="' . $entryContent . '">';
 		}
@@ -500,6 +557,7 @@ function createNewEntry($userID, $templates, $footer) {
 		</div>
 		<div class="entry-content-controls pure-u-1-2">
 			<button type="submit" name="action" value="' . $value . '" class="pure-button outline-inverse">Submit</button>
+			<button class="pure-button outline-inverse">Cancel</button>
 		</div>
 	</div>
 	<div class="entry-content-body">
@@ -521,10 +579,10 @@ New/Edit Entry
 /**** START ****
 Delete Entry
 ****************/
-function createDelete($user, $footer) {
+function createDelete($userID, $footer) {
 	if(isset($_GET['entry'])) {
-		$id = $_GET['entry'];
-		$entry = listSingle($user, $id);
+		$entryID = $_GET['entry'];
+		$entry = listSingle($userID, $entryID);
 		$title = $entry[0]['entryTitle'];
 		$content = $entry[0]['entryContent'];
 	}
@@ -594,15 +652,15 @@ function createSignIn($footer) {
 			<h1>I am <span class="name">Menasco</span>.</h1>
 			<h2>A magical place of hope and wonder</h2>
 		</div>
-		<form class="pure-form pure-form-aligned signIn">
+		<form class="pure-form pure-form-aligned signIn" action="." method="post">
 			<fieldset>
 				<div class="pure-control-group">
 					<label for="email">Email Address</label>
-					<input id="email" placeholder="Email Address">
+					<input id="email" class="form" name="email" placeholder="Email Address">
 				</div>
 				<div class="pure-control-group">
 					<label for="password">Password</label>
-					<input id="password" type="password" placeholder="Password">
+					<input id="password" type="password" name="password" placeholder="Password">
 				</div>
 			</fieldset>
 			<div class="pure-controls">
@@ -611,7 +669,7 @@ function createSignIn($footer) {
 				</label>
 				<a href="./?page=signUp" class="pure-button outline-inverse signUp">Sign Up
 				</a>
-				<button type="submit" class="pure-button outline-inverse">Submit</button>
+				<button type="submit" name="action" value="signIn" class="pure-button outline-inverse">Submit</button>
 			</div>
 		</form>
 		<div class="pure-u-1">

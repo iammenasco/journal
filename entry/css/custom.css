@@ -78,11 +78,21 @@ body {
 	margin: 0;
 }
 .pure-form input:not([type]):focus,
-.pure-form input[type=password]:focus {
+.pure-form input[type=password]:focus,
+.pure-form textarea:focus {
 	border-color: #368DDA;
 	outline: 0;
 	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px #368DDA;
 	box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px #368DDA;
+}
+.pure-form input:not([type]),
+.pure-form input[type=password],
+.pure-form-stacked textarea {
+	color: #fff;
+	background-color: transparent;
+	border-color: #368DDA;
+	border: 1px solid #368DDA;
+	box-shadow: inset 0 0 0 #368DDA;
 }
 #menu {
 	background: black;
@@ -123,7 +133,6 @@ a {
 	color: #999;
 }
 .newEntry {
-
 	margin-bottom: 5%;
 	text-align: left;
 }
