@@ -220,7 +220,7 @@ if(isset($_GET['page'])) {
 		$entries = listAll($userID);
 		$body = '<div class="pure-g"><ul class="pure-1 entryList nav-tabs">';
 		$body .= entryList($userID, $entries, $avatar);
-		$body .= '</ul><div class="pure-1 entry tab-content">';
+		$body .= '</ul></div><div class="pure-1 entry tab-content">';
 		$body .= entryContent($userID, $entries, $footer);
 		$body .= '</div>';
 		$viewText = '| Entries';
@@ -230,7 +230,7 @@ if(isset($_GET['page'])) {
 		$templates = getTemplates();
 		$body = '<div class="pure-g"><ul class="pure-1 entryList nav-tabs">';
 		$body .= createNewList($userID, $templates);
-		$body .= '</ul><div class="pure-1 entry tab-content">';
+		$body .= '</ul></div><div class="pure-1 entry tab-content">';
 		$body .= createNewEntry($userID, $templates, $footer);
 		$body .= '</div>';
 		$viewText = '| Entries | Editor';
@@ -440,16 +440,13 @@ HTML;
 		$i++;
 	}
 	$list .= <<<HTML
-	<li class="{$active}"><a href="#{$id}" data-toggle="tab">
+	<li>
 		<div class="entry-item pure-g">
-			<div class="pure-u">
-				{$avatar}
-			</div>
 			<div class="pure-u-3-4">
 				<a href="?page=new" class="pure-button outline-inverse">New Entry</a>
 			</div>
 		</div>
-	</a></li>
+	</li>
 HTML;
 	return $list;
 }
