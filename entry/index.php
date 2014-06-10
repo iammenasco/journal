@@ -71,7 +71,6 @@ if(isset($_GET['page'])) {
 } else {
 	$view = 'home';
 }
-$errors = '';
 if (isset($_SESSION['loggedIn']) && isset($_SESSION['loggedIn']) == TRUE) {
 	$loggedIn = $_SESSION['loggedIn'];
 	$firstName = $_SESSION['firstName'];
@@ -100,15 +99,28 @@ if (isset($_POST['action'])) {
 		$email = testInput($_POST['email']);
 		$password = testInput($_POST['password']);
 		$password2 = testInput($_POST['password2']);
+		$title = 'Welcome to I am Menasco!';
+		$content = 'Lets talk. There are some features I would like to point out since I worked my butt of making it possible. First off, you might have recognized that the site you are now using is responsive. Second, each of the three parts of the screen scroll separately. Why is this awesome? Well, how often are you going to need to scroll the Left Navigation? Never, if I do my job right. But lets say you have 80 entries. You can scroll those willy nilly, while the content on the right (this box) stays in one place. You can happily do whatever you want. Happy?
+
+Not yet, huh? There is more. Personally, I like the blue. I call it Menasco blue. #368DDA, feels like home. You can change it if you want. I built a drop down selection of various themes on the left. I gave it some colors that look beautiful.
+
+Still reading? If you are adventurous, you might have noticed that some things dont work. Thats intentional. This is just a basic mock-up of what I want it to look like. The first two items on the left will change what you see in this box. The other ones wont, because I am too lazy. Also, you might recognize the blue line on the side of the second entry. I am thinking about flagging entries like that if someone comments or shares or does something special with it.
+
+Let me know what you think so far.';
+
 		// Validate the data
 
 		// Check for errors, handle it!
 
 		// Write data to database
 		$insertResult = registerUser($firstName, $lastName, $email, md5($password));
+
 		// Check Results
 		if ($insertResult) {
-			
+			$insertResult = logIn($email, md5($password));
+			createSession($insertResult);
+			newEntry($insertResult[0]['userID'], $title, $content, NULL, NULL, NULL, 1);
+			header('Location: /site/?page=entries');
 		}
 	} else if ($_POST['action'] == 'newEntry') {
 		$title = testInput($_POST['title']);
@@ -125,7 +137,10 @@ if (isset($_POST['action'])) {
 		$insertResult = newEntry($userID, $title, $content, $url, $start, $end, $templateID);
 		// Check Results
 		if ($insertResult) {
+			$_SESSION['alert'] = array('title' => 'Welcome!', 'message' => 'You have successfully logged in', 'status' => 'success', 'show' => true);
 			header('Location: /site/?page=entries');
+		} else {
+			$_SESSION['alert'] = array('title' => 'Error', 'message' => 'Could not create new entry. Please try again.', 'status' => 'danger', 'show' => true);
 		}
 	} else if ($_POST['action'] == 'updateEntry') {
 		$title = testInput($_POST['title']);
@@ -143,7 +158,10 @@ if (isset($_POST['action'])) {
 		$insertResult = updateEntry($userID, $entryID, $title, $content, $url, $start, $end, $templateID);
 		// Check Results
 		if ($insertResult) {
+			$_SESSION['alert'] = array('title' => 'Entry updated!', 'message' => "$title has now been changed", 'status' => 'success', 'show' => true);
 			header('Location: site/?page=entries');
+		} else {
+			$_SESSION['alert'] = array('title' => 'Changes not saved', 'message' => 'Something went wrong, and the changes were not saved.', 'status' => 'danger', 'show' => true);
 		}
 	} else if ($_POST['action'] == 'delete') {
 		$title = testInput($_POST['title']);
@@ -157,7 +175,10 @@ if (isset($_POST['action'])) {
 		$insertResult = deleteEntry($userID, $entryID, $title, $content);
 		// Check Results
 		if ($insertResult) {
+			$_SESSION['alert'] = array('title' => 'Entry Deleted', 'message' => 'There is no going back now!', 'status' => 'success', 'show' => true);
 			header('Location: /site/?page=entries');
+		} else {
+			$_SESSION['alert'] = array('title' => 'Something went wrong', 'message' => 'The entry you tried to delete did not go anywhere. Please try again', 'status' => 'danger', 'show' => true);
 		}
 	} else if ($_POST['action'] == 'signIn') {
 		$email = testInput($_POST['email']);
@@ -170,24 +191,27 @@ if (isset($_POST['action'])) {
 		$insertResult = logIn($email, md5($password));
 		// Check Results
 		if ($insertResult) {
-			$_SESSION['loggedIn'] = TRUE;
-			$_SESSION['userID'] = $insertResult[0]['userID'];
-			$_SESSION['lastName'] = $insertResult[0]['userLastName'];
-			$_SESSION['firstName'] = $insertResult[0]['userFirstName'];
-			$_SESSION['email'] = $insertResult[0]['userEmail'];
-			$_SESSION['color'] = $insertResult[0]['userColor'];
+			createSession($insertResult);
+			$_SESSION['alert'] = array('title' => 'Welcome!', 'message' => 'You have successfully logged in', 'status' => 'success', 'show' => true);
 			header('Location: /site/?page=entries');
 		} else {
-			$error = 'Incorrect username or password.';
+			$_SESSION['alert'] = array('title' => 'Try Again.', 'message' => 'The email or password you entered is incorrect. Please try again!', 'status' => 'warning', 'show' => true);
+			header('Location: /site/?page=signIn');
 		}
 	}
 }
 if(isset($_GET['page'])) {
 	if ($_GET['page'] == 'signUp') {
+		$alert = createAlert();
+		unset($_SESSION['alert']);
 		$body = createSignUp($footer);
 	} else if ($_GET['page'] == 'signIn') {
+		$alert = createAlert();
+		unset($_SESSION['alert']);
 		$body = createSignIn($footer);
 	} else if ($_GET['page'] == 'entries') {
+		$alert = createAlert();
+		unset($_SESSION['alert']);
 		$avatar = getAvatar($fullName ,$email);
 		$entries = listAll($userID);
 		$body = '<div class="pure-g"><ul class="pure-1 entryList nav-tabs">';
@@ -196,6 +220,8 @@ if(isset($_GET['page'])) {
 		$body .= entryContent($userID, $entries, $footer);
 		$body .= '</div>';
 	} else if ($_GET['page'] == 'new') {
+		$alert = createAlert();
+		unset($_SESSION['alert']);
 		$templates = getTemplates();
 		$body = '<div class="pure-g"><ul class="pure-1 entryList nav-tabs">';
 		$body .= createNewList($userID, $templates);
@@ -203,6 +229,8 @@ if(isset($_GET['page'])) {
 		$body .= createNewEntry($userID, $templates, $footer);
 		$body .= '</div>';
 	} else if ($_GET['page'] == 'delete') {
+		$alert = createAlert();
+		unset($_SESSION['alert']);
 		$body = createDelete($userID, $footer);
 	} else if ($_GET['page'] == 'logOut') {
 		$_SESSION['loggedIn'] = FALSE;
@@ -212,14 +240,61 @@ if(isset($_GET['page'])) {
 		unset($_SESSION['email']);
 		unset($_SESSION['color']);
 		session_destroy();
-		header('Location: /site/');
-		$body = createHome($footer);
+		header('Location: /site');
 	}
 }
 else {
 	$body = createHome($footer);
+	$alert = createAlert();
 }
 
+/**** START ****
+Set Session variables 
+****************/
+function createSession($userArray) {
+	$_SESSION['loggedIn'] = TRUE;
+	$_SESSION['userID'] = $userArray[0]['userID'];
+	$_SESSION['lastName'] = $userArray[0]['userLastName'];
+	$_SESSION['firstName'] = $userArray[0]['userFirstName'];
+	$_SESSION['email'] = $userArray[0]['userEmail'];
+	$_SESSION['color'] = $userArray[0]['userColor'];
+	return TRUE;
+}
+/************
+Session Variables
+**** END ****/
+
+/**** START ****
+Create Alert for information and errors
+
+Uses four types of popups to display information
+	Green: Success
+	Blue: Info
+	Yellow: Warning
+	Red: danger
+****************/
+function createAlert(){
+	if (isset($_SESSION['alert']) && $_SESSION['alert']['show']) {
+	$title = $_SESSION['alert']['title'];
+	$message = $_SESSION['alert']['message'];
+	$status = $_SESSION['alert']['status'];
+	$alert = <<<HTML
+	<div class="alertPopup">
+		<div class="alert alert-{$status} alert-dismissable">
+			<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+			<strong>{$title}</strong> {$message}
+		</div>
+	</div>
+HTML;
+	return $alert;
+} else {
+	return false;
+}
+
+}
+/************
+End Alert
+**** END ****/
 
 /**** START ****
 Create nav
@@ -360,8 +435,7 @@ HTML;
 	<li>
 		<div class="entry-item pure-g">
 			<div class="pure-u-3-4">
-				<a href="#" class="pure-button outline-inverse">Link</a>
-				<a href="#" class="pure-button outline-inverse">Link</a>
+				<a href="?page=new" class="pure-button outline-inverse">New</a>
 			</div>
 		</div>
 	</li>
@@ -453,16 +527,6 @@ function createNewList($userID, $templates) {
 HTML;
 	$i++;
 	}
-	$list .= <<<HTML
-	<li>
-		<div class="entry-item pure-g">
-			<div class="pure-u-3-4">
-				<a href="#" class="pure-button outline-inverse">Link</a>
-				<a href="#" class="pure-button outline-inverse">Link</a>
-			</div>
-		</div>
-	</li>
-HTML;
 	return $list;
 }
 /************
@@ -628,7 +692,7 @@ function createHome($footer) {
 		<div class="pure-g">
 			<div class="pure-u-1 construction">
 				<h1 class="home-heading">Under <span class="name">Construction</span>.</h1>
-				<p class="lead">Patience you must have, my young padawan. Things are changing up a bit. Frequent updates are on the way, check some of them out at the <span class="name">β</span>eta page.</p>
+				<p class="lead">Patience you must have, my young padawan. Things are changing up a bit. Frequent updates are on the way, check some of them out at the <span class="name">&beta;</span>eta page.</p>
 				<p class="lead"><a class="pure-button outline-inverse" href="http://beta.iammenasco.com">See the future.</a></p>
 			</div>
 			<div class="pure-u-1">
@@ -656,7 +720,7 @@ function createSignIn($footer) {
 			<fieldset>
 				<div class="pure-control-group">
 					<label for="email">Email Address</label>
-					<input id="email" class="form" name="email" placeholder="Email Address">
+					<input id="email" class="form" name="email" type="email" placeholder="Email Address">
 				</div>
 				<div class="pure-control-group">
 					<label for="password">Password</label>
@@ -667,9 +731,8 @@ function createSignIn($footer) {
 				<label for="cb" class="pure-checkbox">
 					<input id="cb" type="checkbox" class="remember"> Will you remember me?
 				</label>
-				<a href="./?page=signUp" class="pure-button outline-inverse signUp">Sign Up
-				</a>
-				<button type="submit" name="action" value="signIn" class="pure-button outline-inverse">Submit</button>
+				<button type="submit" name="action" value="signIn" class="pure-button outline-inverse">Go</button>
+				<p><a class="name" href="./?page=signUp">Sign Up... </a></p>
 			</div>
 		</form>
 		<div class="pure-u-1">
@@ -706,14 +769,14 @@ function createSignUp($footer) {
 			<fieldset>
 				<div class="pure-control-group">
 					<label for="email">Email Address</label>
-					<input id="email" placeholder="Email Address" name="email">
+					<input id="email" type="email" placeholder="Email Address" name="email">
 				</div>
 				<div class="pure-control-group">
 					<label for="password">Password</label>
 					<input id="password" type="password" placeholder="Password" name="password">
 				</div>
 				<div class="pure-control-group">
-					<label for="password2">Repeat</label>
+					<label for="password2">Confirm Password</label>
 					<input id="password2" type="password" placeholder="Password" name="password2">
 				</div>
 			</fieldset>
