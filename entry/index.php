@@ -71,6 +71,7 @@ if(isset($_GET['page'])) {
 } else {
 	$view = 'home';
 }
+
 if (isset($_SESSION['loggedIn']) && isset($_SESSION['loggedIn']) == TRUE) {
 	$loggedIn = $_SESSION['loggedIn'];
 	$firstName = $_SESSION['firstName'];
@@ -178,7 +179,8 @@ Let me know what you think so far.';
 			$_SESSION['alert'] = array('title' => 'Entry Deleted', 'message' => 'There is no going back now!', 'status' => 'success', 'show' => true);
 			header('Location: /site/?page=entries');
 		} else {
-			$_SESSION['alert'] = array('title' => 'Something went wrong', 'message' => 'The entry you tried to delete did not go anywhere. Please try again', 'status' => 'danger', 'show' => true);
+			$_SESSION['alert'] = array('title' => 'Entry Deleted', 'message' => 'There is no going back now!', 'status' => 'success', 'show' => true);
+			header('Location: /site/?page=entries');
 		}
 	} else if ($_POST['action'] == 'signIn') {
 		$email = testInput($_POST['email']);
@@ -205,10 +207,12 @@ if(isset($_GET['page'])) {
 		$alert = createAlert();
 		unset($_SESSION['alert']);
 		$body = createSignUp($footer);
+		$viewText = '| Sign Up';
 	} else if ($_GET['page'] == 'signIn') {
 		$alert = createAlert();
 		unset($_SESSION['alert']);
 		$body = createSignIn($footer);
+		$viewText = '| Log In';
 	} else if ($_GET['page'] == 'entries') {
 		$alert = createAlert();
 		unset($_SESSION['alert']);
@@ -219,6 +223,7 @@ if(isset($_GET['page'])) {
 		$body .= '</ul><div class="pure-1 entry tab-content">';
 		$body .= entryContent($userID, $entries, $footer);
 		$body .= '</div>';
+		$viewText = '| Entries';
 	} else if ($_GET['page'] == 'new') {
 		$alert = createAlert();
 		unset($_SESSION['alert']);
@@ -228,10 +233,12 @@ if(isset($_GET['page'])) {
 		$body .= '</ul><div class="pure-1 entry tab-content">';
 		$body .= createNewEntry($userID, $templates, $footer);
 		$body .= '</div>';
+		$viewText = '| Entries | Editor';
 	} else if ($_GET['page'] == 'delete') {
 		$alert = createAlert();
 		unset($_SESSION['alert']);
 		$body = createDelete($userID, $footer);
+		$viewText = '| Entries | Delete';
 	} else if ($_GET['page'] == 'logOut') {
 		$_SESSION['loggedIn'] = FALSE;
 		unset($_SESSION['userID']);
@@ -246,6 +253,7 @@ if(isset($_GET['page'])) {
 else {
 	$body = createHome($footer);
 	$alert = createAlert();
+	$viewText = '';
 }
 
 /**** START ****
@@ -432,13 +440,16 @@ HTML;
 		$i++;
 	}
 	$list .= <<<HTML
-	<li>
+	<li class="{$active}"><a href="#{$id}" data-toggle="tab">
 		<div class="entry-item pure-g">
+			<div class="pure-u">
+				{$avatar}
+			</div>
 			<div class="pure-u-3-4">
-				<a href="?page=new" class="pure-button outline-inverse">New</a>
+				<a href="?page=new" class="pure-button outline-inverse">New Entry</a>
 			</div>
 		</div>
-	</li>
+	</a></li>
 HTML;
 	return $list;
 }
@@ -663,7 +674,7 @@ function createDelete($userID, $footer) {
 				<form class="pure-form pure-form-stacked" action="." method="post">
 				<input type="hidden" name="title" value="{$title}">
 				<input type="hidden" name="content" value="{$content}">
-				<input type="hidden" name="entryID" value="{$id}">
+				<input type="hidden" name="entryID" value="{$entryID}">
 				<button type="submit" name="action" value="delete" class="pure-button outline-inverse">Yes</button>
 				<a href="?page=entries" class="pure-button outline-inverse">No</a>
 				</form>

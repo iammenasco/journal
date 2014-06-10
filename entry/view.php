@@ -1,9 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="en-US">
 <head>
+	<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta name="description" content="Nobody cares about this crap.">
-	<title>I am Menasco. | Entries </title>
+	<title>I am Menasco. <?php echo $viewText; ?></title>
 	<link type="text/css" rel="stylesheet" href="css/pure-main.css">
 	<link type="text/css" rel="stylesheet" href="css/entry.css">
 	<link type="text/css" rel="stylesheet" href="css/side-menu.css">
