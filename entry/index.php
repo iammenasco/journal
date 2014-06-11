@@ -88,7 +88,11 @@ if (isset($_SESSION['loggedIn']) && isset($_SESSION['loggedIn']) == TRUE) {
 	$color = '';
 	$userID = '';
 	$loggedIn = FALSE;
-
+}
+if ($color != '') {
+	$colorCSS = '<link rel="stylesheet" type="text/css" href="css/theme/' . $color . '.css" id="theme">';
+} else {
+	$colorCSS = '';
 }
 $nav = createNav($loggedIn, $lastName, $alertCount, $view);
 $footer = createFooter();
@@ -138,7 +142,7 @@ Let me know what you think so far.';
 		$insertResult = newEntry($userID, $title, $content, $url, $start, $end, $templateID);
 		// Check Results
 		if ($insertResult) {
-			$_SESSION['alert'] = array('title' => 'Welcome!', 'message' => 'You have successfully logged in', 'status' => 'success', 'show' => true);
+			$_SESSION['alert'] = array('title' => 'Entry Saved', 'message' => 'The new entry is now available for your enjoyment', 'status' => 'success', 'show' => true);
 			header('Location: /site/?page=entries');
 		} else {
 			$_SESSION['alert'] = array('title' => 'Error', 'message' => 'Could not create new entry. Please try again.', 'status' => 'danger', 'show' => true);
@@ -220,7 +224,7 @@ if(isset($_GET['page'])) {
 		$entries = listAll($userID);
 		$body = '<div class="pure-g"><ul class="pure-1 entryList nav-tabs">';
 		$body .= entryList($userID, $entries, $avatar);
-		$body .= '</ul></div><div class="pure-1 entry tab-content">';
+		$body .= '</ul><div class="pure-1 entry tab-content">';
 		$body .= entryContent($userID, $entries, $footer);
 		$body .= '</div>';
 		$viewText = '| Entries';
@@ -230,7 +234,7 @@ if(isset($_GET['page'])) {
 		$templates = getTemplates();
 		$body = '<div class="pure-g"><ul class="pure-1 entryList nav-tabs">';
 		$body .= createNewList($userID, $templates);
-		$body .= '</ul></div><div class="pure-1 entry tab-content">';
+		$body .= '</ul><div class="pure-1 entry tab-content">';
 		$body .= createNewEntry($userID, $templates, $footer);
 		$body .= '</div>';
 		$viewText = '| Entries | Editor';

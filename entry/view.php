@@ -9,6 +9,7 @@
 	<link type="text/css" rel="stylesheet" href="css/entry.css">
 	<link type="text/css" rel="stylesheet" href="css/side-menu.css">
 	<link type="text/css" rel="stylesheet" href="css/custom.css">
+	<?php echo $colorCSS; ?>
 </head>
 <body>
 	<div id="layout" class="content">

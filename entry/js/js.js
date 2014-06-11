@@ -225,3 +225,7 @@ function loadCSS(color){
   if (color != 'blue')
     document.getElementsByTagName("head")[0].appendChild(fileref);
 }
+
+setTimeout(function() {
+    $('.alertPopup').fadeOut('fast');
+}, 2500);
