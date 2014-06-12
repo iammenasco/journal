@@ -9,32 +9,43 @@ try {
 
 function logIn($email, $password) {
 	$con = con();
-	$sql = 
-	'SELECT * FROM users WHERE userEmail = :userEmail and userPassword = :userPassword';
-	$stmt = $con->prepare($sql);
-	$stmt->bindParam(':userEmail', $email);
-	$stmt->bindParam(':userPassword', $password);
-	$stmt->execute();
-	$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-	$stmt->closeCursor();
-	return $result;
+	try {
+		$sql = 
+		'SELECT * FROM users WHERE userEmail = :userEmail and userPassword = :userPassword';
+		$stmt = $con->prepare($sql);
+		$stmt->bindParam(':userEmail', $email, PDO::PARAM_STR);
+		$stmt->bindParam(':userPassword', $password, PDO::PARAM_STR);
+		$stmt->execute();
+		$result = $stmt->fetch(PDO::FETCH_ASSOC);
+		$stmt->closeCursor();
+		if (!empty($result)) {
+			return $result;
+		} else {
+			return FALSE;
+		}
+	} catch (PDOException $e) {
+		return FALSE;
+	}
 }
 
 function registerUser($firstName, $lastName, $email, $password) {
 	$con = con();
-	$sql = 
-	'INSERT INTO users (userFirstName, userLastName, userEmail, userPassword)
-	VALUES (:userFirstName, :userLastName, :userEmail, :userPassword);';
-	$stmt = $con->prepare($sql);
-	$stmt->bindParam(':userFirstName', $firstName);
-	$stmt->bindParam(':userLastName', $lastName);
-	$stmt->bindParam(':userEmail', $email);
-	$stmt->bindParam(':userPassword', $password);
-	$stmt->execute();
-	$insertResult = $con->lastInsertId();
-	$stmt->closeCursor();
-
-	if ($insertResult) {
+	try {
+		$sql = 
+		'INSERT INTO users (userFirstName, userLastName, userEmail, userPassword)
+		VALUES (:userFirstName, :userLastName, :userEmail, :userPassword);';
+		$stmt = $con->prepare($sql);
+		$stmt->bindParam(':userFirstName', $firstName, PDO::PARAM_STR);
+		$stmt->bindParam(':userLastName', $lastName, PDO::PARAM_STR);
+		$stmt->bindParam(':userEmail', $email, PDO::PARAM_STR);
+		$stmt->bindParam(':userPassword', $password, PDO::PARAM_STR);
+		$stmt->execute();
+		$result = $con->lastInsertId();
+		$stmt->closeCursor();
+	} catch (PDOException $e) {
+		return FALSE;
+	}
+	if ($result >= 1) {
 		return TRUE;
 	} else {
 		return FALSE;
@@ -43,22 +54,25 @@ function registerUser($firstName, $lastName, $email, $password) {
 
 function newEntry($userID, $title, $content, $url, $start, $end, $templateID) {
 	$con = con();
-	$sql = 
-	'INSERT INTO entries (entryCreatedBy,entryTitle, entryContent, entryURL, entryStartTime, entryEndTime, entryTemplateID)
-	VALUES (:entryCreatedBy, :entryTitle, :entryContent, :entryURL, :entryStartTime, :entryEndTime, :entryTemplateID);';
-	$stmt = $con->prepare($sql);
-	$stmt->bindParam(':entryCreatedBy', $userID);
-	$stmt->bindParam(':entryTitle', $title);
-	$stmt->bindParam(':entryContent', $content);
-	$stmt->bindParam(':entryURL', $url);
-	$stmt->bindParam(':entryStartTime', $start);
-	$stmt->bindParam(':entryEndTime', $end);
-	$stmt->bindParam(':entryTemplateID', $templateID);
-	$stmt->execute();
-	$insertResult = $con->lastInsertId();
-	$stmt->closeCursor();
-
-	if ($insertResult) {
+	try {
+		$sql = 
+		'INSERT INTO entries (entryCreatedBy,entryTitle, entryContent, entryURL, entryStartTime, entryEndTime, entryTemplateID)
+		VALUES (:entryCreatedBy, :entryTitle, :entryContent, :entryURL, :entryStartTime, :entryEndTime, :entryTemplateID);';
+		$stmt = $con->prepare($sql);
+		$stmt->bindParam(':entryCreatedBy', $userID, PDO::PARAM_INT);
+		$stmt->bindParam(':entryTitle', $title, PDO::PARAM_STR);
+		$stmt->bindParam(':entryContent', $content, PDO::PARAM_STR);
+		$stmt->bindParam(':entryURL', $url, PDO::PARAM_STR);
+		$stmt->bindParam(':entryStartTime', $start, PDO::PARAM_STR);
+		$stmt->bindParam(':entryEndTime', $end, PDO::PARAM_STR);
+		$stmt->bindParam(':entryTemplateID', $templateID, PDO::PARAM_INT);
+		$stmt->execute();
+		$result = $con->lastInsertId();
+		$stmt->closeCursor();
+	} catch (PDOException $e) {
+		return FALSE;
+	}
+	if ($result >= 1) {
 		return TRUE;
 	} else {
 		return FALSE;
@@ -67,26 +81,30 @@ function newEntry($userID, $title, $content, $url, $start, $end, $templateID) {
 
 function updateEntry($userID, $entryID, $title, $content, $url, $start, $end, $templateID) {
 	$con = con();
-	$sql = 
-	'UPDATE entries 
+	try {
+		$sql = 
+		'UPDATE entries 
 		SET entryTitle = :entryTitle, entryContent = :entryContent, entryURL = :entryURL, entryStartTime = :entryStartTime, entryEndTime = :entryEndTime, entryTemplateID = :entryTemplateID
-			WHERE entryCreatedBy = :entryCreatedBy
-			AND entryID = :entryID;';
-	$stmt = $con->prepare($sql);
-	$stmt->bindParam(':entryCreatedBy', $userID);
-	$stmt->bindParam(':entryID', $entryID);
-	$stmt->bindParam(':entryTitle', $title);
-	$stmt->bindParam(':entryContent', $content);
-	$stmt->bindParam(':entryURL', $url);
-	$stmt->bindParam(':entryStartTime', $start);
-	$stmt->bindParam(':entryEndTime', $end);
-	$stmt->bindParam(':entryTemplateID', $templateID);
-	$stmt->execute();
-	$insertResult = $con->lastInsertId();
-	$stmt->closeCursor();
-
-	if ($insertResult) {
-		return TRUE;
+		WHERE entryCreatedBy = :entryCreatedBy
+		AND entryID = :entryID;';
+		$stmt = $con->prepare($sql);
+		$stmt->bindParam(':entryCreatedBy', $userID, PDO::PARAM_INT);
+		$stmt->bindParam(':entryID', $entryID, PDO::PARAM_INT);
+		$stmt->bindParam(':entryTitle', $title, PDO::PARAM_STR);
+		$stmt->bindParam(':entryContent', $content, PDO::PARAM_STR);
+		$stmt->bindParam(':entryURL', $url, PDO::PARAM_STR);
+		$stmt->bindParam(':entryStartTime', $start, PDO::PARAM_STR);
+		$stmt->bindParam(':entryEndTime', $end, PDO::PARAM_STR);
+		$stmt->bindParam(':entryTemplateID', $templateID, PDO::PARAM_INT);
+		$stmt->execute();
+		$result = $stmt->rowCount();
+		$stmt->closeCursor();
+		return $result;
+	} catch (PDOException $e) {
+		return FALSE;
+	}
+	if ($result) {
+		return $result;
 	} else {
 		return FALSE;
 	}
@@ -94,23 +112,26 @@ function updateEntry($userID, $entryID, $title, $content, $url, $start, $end, $t
 
 function deleteEntry($userID, $entryID, $title, $content) {
 	$con = con();
-	$sql = 
-	'DELETE FROM entries 
+	try {
+		$sql = 
+		'DELETE FROM entries 
 		WHERE entryCreatedBy = :entryCreatedBy
 		AND entryID = :entryID;
 		AND entryTitle = :entryTitle
 		AND entryContent = :entryContent;';
-	$stmt = $con->prepare($sql);
-	$stmt->bindParam(':entryCreatedBy', $userID);
-	$stmt->bindParam(':entryID', $entryID);
-	$stmt->bindParam(':entryTitle', $title);
-	$stmt->bindParam(':entryContent', $content);
-	$stmt->execute();
-	$insertResult = $con->lastInsertId();
-	$stmt->closeCursor();
-
-	if ($insertResult) {
-		return TRUE;
+		$stmt = $con->prepare($sql);
+		$stmt->bindParam(':entryCreatedBy', $userID, PDO::PARAM_INT);
+		$stmt->bindParam(':entryID', $entryID, PDO::PARAM_INT);
+		$stmt->bindParam(':entryTitle', $title, PDO::PARAM_STR);
+		$stmt->bindParam(':entryContent', $content, PDO::PARAM_STR);
+		$stmt->execute();
+		$result = $stmt->rowCount();
+		$stmt->closeCursor();
+	} catch (PDOException $e) {
+		return FALSE;
+	}
+	if ($result) {
+		return $result;
 	} else {
 		return FALSE;
 	}
@@ -118,29 +139,45 @@ function deleteEntry($userID, $entryID, $title, $content) {
 
 function listAll($userID) {
 	$con = con();
-	$query = 'SELECT * FROM entries
-				WHERE entryCreatedBy = :entryCreatedBy
-				ORDER BY entryTime DESC;';
-	$stmt = $con->prepare($query);
-	$stmt->bindParam(':entryCreatedBy', $userID);
-	$stmt->execute();
-	$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-	$stmt->closeCursor();
-	return $result;
+	try {
+		$query = 'SELECT * FROM entries
+		WHERE entryCreatedBy = :entryCreatedBy
+		ORDER BY entryTime DESC;';
+		$stmt = $con->prepare($query);
+		$stmt->bindParam(':entryCreatedBy', $userID, PDO::PARAM_INT);
+		$stmt->execute();
+		$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		$stmt->closeCursor();
+		if (!empty($result)) {
+			return $result;
+		} else {
+			return FALSE;
+		}
+	} catch (PDOException $e) {
+		return FALSE;
+	}
 }
 
 function listSingle($userID, $entryID) {
 	$con = con();
-	$query = 'SELECT * FROM entries
-				WHERE entryCreatedBy = :entryCreatedBy
-				AND entryID = :entryID;';
-	$stmt = $con->prepare($query);
-	$stmt->bindParam(':entryCreatedBy', $userID);
-	$stmt->bindParam(':entryID', $entryID);
-	$stmt->execute();
-	$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-	$stmt->closeCursor();
-	return $result;
+	try {
+		$query = 'SELECT * FROM entries
+		WHERE entryCreatedBy = :entryCreatedBy
+		AND entryID = :entryID;';
+		$stmt = $con->prepare($query);
+		$stmt->bindParam(':entryCreatedBy', $userID, PDO::PARAM_INT);
+		$stmt->bindParam(':entryID', $entryID, PDO::PARAM_INT);
+		$stmt->execute();
+		$result = $stmt->fetch(PDO::FETCH_ASSOC);
+		$stmt->closeCursor();
+		if (!empty($result)) {
+			return $result;
+		} else {
+			return FALSE;
+		}
+	} catch (PDOException $e) {
+		return FALSE;
+	}
 }
 
 // function currentUser($userID) {
@@ -157,26 +194,42 @@ function listSingle($userID, $entryID) {
 
 function entryName($entryID) {
 	$con = con();
-	$query = 'SELECT users.userFirstName, users.userLastName
-	FROM users
-	INNER JOIN entries
-	ON users.userID = entries.entryCreatedBy
-	WHERE entryCreatedBy=:entryCreatedBy;';
-	$stmt = $con->prepare($query);
-	$stmt->bindParam(':entryCreatedBy', $entryID);
-	$stmt->execute();
-	$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-	$stmt->closeCursor();
-	return $result;
+	try {
+		$query = 'SELECT users.userFirstName, users.userLastName
+		FROM users
+		INNER JOIN entries
+		ON users.userID = entries.entryCreatedBy
+		WHERE entryCreatedBy=:entryCreatedBy;';
+		$stmt = $con->prepare($query);
+		$stmt->bindParam(':entryCreatedBy', $entryID, PDO::PARAM_INT);
+		$stmt->execute();
+		$result = $stmt->fetch(PDO::FETCH_ASSOC);
+		$stmt->closeCursor();
+		if (!empty($result)) {
+			return $result;
+		} else {
+			return FALSE;
+		}
+	} catch (PDOException $e) {
+		return FALSE;
+	}
 }
 
 function getTemplates() {
 	$con = con();
-	$query = 'SELECT * FROM templates';
-	$stmt = $con->prepare($query);
-	$stmt->execute();
-	$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-	$stmt->closeCursor();
-	return $result;
+	try {
+		$query = 'SELECT * FROM templates';
+		$stmt = $con->prepare($query);
+		$stmt->execute();
+		$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		$stmt->closeCursor();
+		if (!empty($result)) {
+			return $result;
+		} else {
+			return FALSE;
+		}
+	} catch (PDOException $e) {
+		return FALSE;
+	}
 }
 ?>

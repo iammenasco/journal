@@ -79,6 +79,7 @@ if (isset($_SESSION['loggedIn']) && isset($_SESSION['loggedIn']) == TRUE) {
 	$fullName = $firstName . ' ' . $lastName;
 	$email = $_SESSION['email'];
 	$color = $_SESSION['color'];
+	$theme = $_SESSION['theme'];
 	$userID = $_SESSION['userID'];
 } else {
 	$firstName = '';
@@ -86,6 +87,7 @@ if (isset($_SESSION['loggedIn']) && isset($_SESSION['loggedIn']) == TRUE) {
 	$fullName = '';
 	$email = '';
 	$color = '';
+	$theme = '';
 	$userID = '';
 	$loggedIn = FALSE;
 }
@@ -94,39 +96,57 @@ if ($color != '') {
 } else {
 	$colorCSS = '';
 }
+if ($theme != '') {
+	$themeCSS = '<link rel="stylesheet" type="text/css" href="css/theme/' . $theme . '.css" id="theme">';
+} else {
+	$themeCSS = '';
+}
 $nav = createNav($loggedIn, $lastName, $alertCount, $view);
 $footer = createFooter();
 
 if (isset($_POST['action'])) {
 	if ($_POST['action'] == 'register') {
-		$firstName = testInput($_POST['firstName']);
-		$lastName = testInput($_POST['lastName']);
+		$firstName = ucfirst(strtolower(testInput($_POST['firstName'])));
+		$lastName = ucfirst(strtolower(testInput($_POST['lastName'])));
 		$email = testInput($_POST['email']);
 		$password = testInput($_POST['password']);
 		$password2 = testInput($_POST['password2']);
 		$title = 'Welcome to I am Menasco!';
-		$content = 'Lets talk. There are some features I would like to point out since I worked my butt of making it possible. First off, you might have recognized that the site you are now using is responsive. Second, each of the three parts of the screen scroll separately. Why is this awesome? Well, how often are you going to need to scroll the Left Navigation? Never, if I do my job right. But lets say you have 80 entries. You can scroll those willy nilly, while the content on the right (this box) stays in one place. You can happily do whatever you want. Happy?
-
-Not yet, huh? There is more. Personally, I like the blue. I call it Menasco blue. #368DDA, feels like home. You can change it if you want. I built a drop down selection of various themes on the left. I gave it some colors that look beautiful.
-
-Still reading? If you are adventurous, you might have noticed that some things dont work. Thats intentional. This is just a basic mock-up of what I want it to look like. The first two items on the left will change what you see in this box. The other ones wont, because I am too lazy. Also, you might recognize the blue line on the side of the second entry. I am thinking about flagging entries like that if someone comments or shares or does something special with it.
-
-Let me know what you think so far.';
+		$content = 'This is your first post! You can edit it, change the template, or delete it. Feel free to do whatever you want with it, and continue to add more! You can (and should) create many entries and use this as an online journal. Have fun and let me know how it all works out for you!';
 
 		// Validate the data
-
+		if (!empty($firstName) &&
+			!empty($lastName) &&
+			!empty($email) &&
+			filter_var($email, FILTER_VALIDATE_EMAIL) &&
+			!empty($password) &&
+			!empty($password2) &&
+			$password == $password2) {
+			$valid = true;
+		} else {
+			$valid = false;
+		}
 		// Check for errors, handle it!
 
 		// Write data to database
-		$insertResult = registerUser($firstName, $lastName, $email, md5($password));
-
-		// Check Results
-		if ($insertResult) {
-			$insertResult = logIn($email, md5($password));
-			createSession($insertResult);
-			newEntry($insertResult[0]['userID'], $title, $content, NULL, NULL, NULL, 1);
-			header('Location: /site/?page=entries');
+		if ($valid) {
+			$result = registerUser($firstName, $lastName, $email, md5($password));
+		} else {
+			$_SESSION['alert'] = array('title' => 'Opps!', 'message' => 'There was an error creating your account. Please enter information in all the fields.', 'status' => 'danger', 'show' => true);
+			header('Location: /site/?page=signUp');
+			exit;
 		}
+		// Check Results
+		if ($result) {
+			$result = logIn($email, md5($password));
+			createSession($result);
+			newEntry($result['userID'], $title, $content, NULL, NULL, NULL, 1);
+			$_SESSION['alert'] = array('title' => "Welcome, $firstName!", 'message' => 'Your account has been created, and you are now logged in. Have fun!', 'status' => 'success', 'show' => true);
+			header('Location: /site/?page=entries');
+		} else if ($result == false) {
+			$_SESSION['alert'] = array('title' => 'Opps!', 'message' => 'There was an issue creating your account, please try again.', 'status' => 'danger', 'show' => true);
+			header('Location: /site/?page=signUp');
+		} 
 	} else if ($_POST['action'] == 'newEntry') {
 		$title = testInput($_POST['title']);
 		$content = testInput($_POST['content']);
@@ -135,17 +155,29 @@ Let me know what you think so far.';
 		$end = testInput($_POST['end']);
 		$templateID = testInput($_POST['templateID']);
 		// Validate the data
-
+		if (!empty($title) &&
+			!empty($content) &&
+			!empty($templateID)) {
+			$valid = true;
+		} else {
+			$valid = false;
+		}
 		// Check for errors, handle it!
-
 		// Write data to database
-		$insertResult = newEntry($userID, $title, $content, $url, $start, $end, $templateID);
+		if ($valid) {
+			$result = newEntry($userID, $title, $content, $url, $start, $end, $templateID);
+		} else {
+			$_SESSION['alert'] = array('title' => 'Error', 'message' => 'Could not create new entry. Please try again.', 'status' => 'danger', 'show' => true);
+			header('Location: /site/?page=new');
+			exit;
+		}
 		// Check Results
-		if ($insertResult) {
+		if ($result) {
 			$_SESSION['alert'] = array('title' => 'Entry Saved', 'message' => 'The new entry is now available for your enjoyment', 'status' => 'success', 'show' => true);
 			header('Location: /site/?page=entries');
 		} else {
 			$_SESSION['alert'] = array('title' => 'Error', 'message' => 'Could not create new entry. Please try again.', 'status' => 'danger', 'show' => true);
+			header('Location: /site/?page=new');
 		}
 	} else if ($_POST['action'] == 'updateEntry') {
 		$title = testInput($_POST['title']);
@@ -156,48 +188,84 @@ Let me know what you think so far.';
 		$entryID = testInput($_POST['entryID']);
 		$templateID = testInput($_POST['templateID']);
 		// Validate the data
-
+		if (!empty($title) &&
+			!empty($content) &&
+			!empty($entryID) &&
+			!empty($templateID)) {
+			$valid = true;
+		} else {
+			$valid = false;
+		}
 		// Check for errors, handle it!
 
 		// Write data to database
-		$insertResult = updateEntry($userID, $entryID, $title, $content, $url, $start, $end, $templateID);
-		// Check Results
-		if ($insertResult) {
-			$_SESSION['alert'] = array('title' => 'Entry updated!', 'message' => "$title has now been changed", 'status' => 'success', 'show' => true);
-			header('Location: site/?page=entries');
+		if ($valid) {
+			$result = updateEntry($userID, $entryID, $title, $content, $url, $start, $end, $templateID);
 		} else {
-			$_SESSION['alert'] = array('title' => 'Changes not saved', 'message' => 'Something went wrong, and the changes were not saved.', 'status' => 'danger', 'show' => true);
+			$_SESSION['alert'] = array('title' => 'Changes not saved', 'message' => 'Something went wrong, and the changes were not saved. Please try again!', 'status' => 'danger', 'show' => true);
+			header('Location: /site/?page=entries');
+			exit;
+		}
+		// Check Results
+		if ($result) {
+			$_SESSION['alert'] = array('title' => 'Entry updated!', 'message' => "$title has now been changed.", 'status' => 'success', 'show' => true);
+			header('Location: /site/?page=entries');
+		} else {
+			$_SESSION['alert'] = array('title' => 'Changes not saved', 'message' => 'Something went wrong, and the changes were not saved. Please try again!', 'status' => 'danger', 'show' => true);
+			header('Location: /site/?page=entries');
 		}
 	} else if ($_POST['action'] == 'delete') {
-		$title = testInput($_POST['title']);
+		$title = ucfirst(strtolower(testInput($_POST['title'])));
 		$content = testInput($_POST['content']);
 		$entryID = testInput($_POST['entryID']);
 		// Validate the data
-
+		if (!empty($title) &&
+			!empty($content) &&
+			!empty($entryID)) {
+			$valid = true;
+		} else {
+			$valid = false;
+		}
 		// Check for errors, handle it!
 
 		// Write data to database
-		$insertResult = deleteEntry($userID, $entryID, $title, $content);
+		if ($valid) {
+			$result = deleteEntry($userID, $entryID, $title, $content);
+		} else {
+			$_SESSION['alert'] = array('title' => 'Entry not Deleted', 'message' => 'The entry was not deleted, please try again!', 'status' => 'warning', 'show' => true);
+			header('Location: /site/?page=entries');
+		}
 		// Check Results
-		if ($insertResult) {
+		if ($result) {
 			$_SESSION['alert'] = array('title' => 'Entry Deleted', 'message' => 'There is no going back now!', 'status' => 'success', 'show' => true);
 			header('Location: /site/?page=entries');
 		} else {
-			$_SESSION['alert'] = array('title' => 'Entry Deleted', 'message' => 'There is no going back now!', 'status' => 'success', 'show' => true);
+			$_SESSION['alert'] = array('title' => 'Entry not Deleted', 'message' => 'The entry was not deleted, please try again!', 'status' => 'warning', 'show' => true);
 			header('Location: /site/?page=entries');
 		}
 	} else if ($_POST['action'] == 'signIn') {
 		$email = testInput($_POST['email']);
 		$password = testInput($_POST['password']);
 		// Validate the data
-
+		if (!empty($email) &&
+			!empty($password)) {
+			$valid = true;
+		} else {
+			$valid = false;
+		}
 		// Check for errors, handle it!
 
 		// Write data to database
-		$insertResult = logIn($email, md5($password));
+		if ($valid) {
+			$result = logIn($email, md5($password));
+		} else {
+			$_SESSION['alert'] = array('title' => 'Opps!', 'message' => 'There was an error logging into your account. Please enter information in all the fields.', 'status' => 'danger', 'show' => true);
+			header('Location: /site/?page=signIn');
+			exit;
+		}
 		// Check Results
-		if ($insertResult) {
-			createSession($insertResult);
+		if ($result) {
+			createSession($result);
 			$_SESSION['alert'] = array('title' => 'Welcome!', 'message' => 'You have successfully logged in', 'status' => 'success', 'show' => true);
 			header('Location: /site/?page=entries');
 		} else {
@@ -218,31 +286,46 @@ if(isset($_GET['page'])) {
 		$body = createSignIn($footer);
 		$viewText = '| Log In';
 	} else if ($_GET['page'] == 'entries') {
-		$alert = createAlert();
-		unset($_SESSION['alert']);
-		$avatar = getAvatar($fullName ,$email);
-		$entries = listAll($userID);
-		$body = '<div class="pure-g"><ul class="pure-1 entryList nav-tabs">';
-		$body .= entryList($userID, $entries, $avatar);
-		$body .= '</ul><div class="pure-1 entry tab-content">';
-		$body .= entryContent($userID, $entries, $footer);
-		$body .= '</div>';
-		$viewText = '| Entries';
+		if ($loggedIn) {
+			$alert = createAlert();
+			unset($_SESSION['alert']);
+			$avatar = getAvatar($fullName ,$email);
+			$entries = listAll($userID);
+			$body = '<div class="pure-g"><ul class="pure-1 entryList nav-tabs">';
+			$body .= entryList($userID, $entries, $avatar);
+			$body .= '</ul><div class="pure-1 entry tab-content">';
+			$body .= entryContent($userID, $entries, $footer);
+			$body .= '</div>';
+			$viewText = '| Entries';
+		} else {
+			$_SESSION['alert'] = array('title' => 'Please Login.', 'message' => 'To view the previous page, you must be logged in.', 'status' => 'danger', 'show' => true);
+			header('Location: /site/?page=signIn');
+		}
 	} else if ($_GET['page'] == 'new') {
-		$alert = createAlert();
-		unset($_SESSION['alert']);
-		$templates = getTemplates();
-		$body = '<div class="pure-g"><ul class="pure-1 entryList nav-tabs">';
-		$body .= createNewList($userID, $templates);
-		$body .= '</ul><div class="pure-1 entry tab-content">';
-		$body .= createNewEntry($userID, $templates, $footer);
-		$body .= '</div>';
-		$viewText = '| Entries | Editor';
+		if ($loggedIn) {
+			$alert = createAlert();
+			unset($_SESSION['alert']);
+			$templates = getTemplates();
+			$body = '<div class="pure-g"><ul class="pure-1 entryList nav-tabs">';
+			$body .= createNewList($userID, $templates);
+			$body .= '</ul><div class="pure-1 entry tab-content">';
+			$body .= createNewEntry($userID, $templates, $footer);
+			$body .= '</div></div>';
+			$viewText = '| Entries | Editor';
+		} else {
+			$_SESSION['alert'] = array('title' => 'Please Login.', 'message' => 'To view the previous page, you must be logged in.', 'status' => 'danger', 'show' => true);
+			header('Location: /site/?page=signIn');
+		}
 	} else if ($_GET['page'] == 'delete') {
-		$alert = createAlert();
-		unset($_SESSION['alert']);
-		$body = createDelete($userID, $footer);
-		$viewText = '| Entries | Delete';
+		if ($loggedIn) {
+			$alert = createAlert();
+			unset($_SESSION['alert']);
+			$body = createDelete($userID, $footer);
+			$viewText = '| Entries | Delete';
+		} else {
+			$_SESSION['alert'] = array('title' => 'Please Login.', 'message' => 'To view the previous page, you must be logged in.', 'status' => 'danger', 'show' => true);
+			header('Location: /site/?page=signIn');
+		}
 	} else if ($_GET['page'] == 'logOut') {
 		$_SESSION['loggedIn'] = FALSE;
 		unset($_SESSION['userID']);
@@ -250,6 +333,7 @@ if(isset($_GET['page'])) {
 		unset($_SESSION['firstName']);
 		unset($_SESSION['email']);
 		unset($_SESSION['color']);
+		unset($_SESSION['theme']);
 		session_destroy();
 		header('Location: /site');
 	}
@@ -265,11 +349,12 @@ Set Session variables
 ****************/
 function createSession($userArray) {
 	$_SESSION['loggedIn'] = TRUE;
-	$_SESSION['userID'] = $userArray[0]['userID'];
-	$_SESSION['lastName'] = $userArray[0]['userLastName'];
-	$_SESSION['firstName'] = $userArray[0]['userFirstName'];
-	$_SESSION['email'] = $userArray[0]['userEmail'];
-	$_SESSION['color'] = $userArray[0]['userColor'];
+	$_SESSION['userID'] = $userArray['userID'];
+	$_SESSION['lastName'] = $userArray['userLastName'];
+	$_SESSION['firstName'] = $userArray['userFirstName'];
+	$_SESSION['email'] = $userArray['userEmail'];
+	$_SESSION['color'] = $userArray['userColor'];
+	$_SESSION['theme'] = $userArray['userTheme'];
 	return TRUE;
 }
 /************
@@ -434,7 +519,7 @@ function entryList($userID, $entries, $avatar) {
 				{$avatar}
 			</div>
 			<div class="pure-u-3-4">
-				<h5 class="entry-name">{$name[0]['userFirstName']} {$name[0]['userLastName']}</h5>
+				<h5 class="entry-name">{$name['userFirstName']} {$name['userLastName']}</h5>
 				<h4 class="entry-subject">{$title}</h4>
 				<p class="entry-desc">{$snip}</p>
 			</div>
@@ -491,7 +576,7 @@ function entryContent($userID, $entries, $footer) {
 		<div class="entry-content-header pure-g">
 			<div class="pure-u-1-2">
 				<h1 class="entry-content-title">{$subject}</h1>
-				<p class="entry-content-subtitle">From <a>{$name[0]['userFirstName']} {$name[0]['userLastName']}</a> at <span>{$time}</span>
+				<p class="entry-content-subtitle">From <a>{$name['userFirstName']} {$name['userLastName']}</a> at <span>{$time}</span>
 				</p>
 			</div>
 			<div class="entry-content-controls pure-u-1-2">
@@ -557,12 +642,12 @@ function createNewEntry($userID, $templates, $footer) {
 	if(isset($_GET['entry'])) {
 		$entryID = $_GET['entry'];
 		$entry = listSingle($userID, $entryID);
-		$entryTitle = $entry[0]['entryTitle'];
-		$entryContent = $entry[0]['entryContent'];
-		$displayTime = date("g:ia, F jS, Y",strtotime($entry[0]['entryTime']));
-		$entryURL = $entry[0]['entryURL'];
-		$entryStartTime = $entry[0]['entryStartTime'];
-		$entryEndTime = $entry[0]['entryEndTime'];
+		$entryTitle = $entry['entryTitle'];
+		$entryContent = $entry['entryContent'];
+		$displayTime = date("g:ia, F jS, Y",strtotime($entry['entryTime']));
+		$entryURL = $entry['entryURL'];
+		$entryStartTime = $entry['entryStartTime'];
+		$entryEndTime = $entry['entryEndTime'];
 		$value = 'updateEntry';
 	} else {
 		$entryID = '';
@@ -633,7 +718,7 @@ function createNewEntry($userID, $templates, $footer) {
 		</div>
 		<div class="entry-content-controls pure-u-1-2">
 			<button type="submit" name="action" value="' . $value . '" class="pure-button outline-inverse">Submit</button>
-			<button class="pure-button outline-inverse">Cancel</button>
+			<a href="?page=entries" class="pure-button outline-inverse">Cancel</a>
 		</div>
 	</div>
 	<div class="entry-content-body">
@@ -659,8 +744,8 @@ function createDelete($userID, $footer) {
 	if(isset($_GET['entry'])) {
 		$entryID = $_GET['entry'];
 		$entry = listSingle($userID, $entryID);
-		$title = $entry[0]['entryTitle'];
-		$content = $entry[0]['entryContent'];
+		$title = $entry['entryTitle'];
+		$content = $entry['entryContent'];
 	}
 	return <<<HTML
 	<div class="main">
@@ -670,7 +755,7 @@ function createDelete($userID, $footer) {
 		</div>
 		<div class="pure-g">
 			<div class="pure-u-1 construction">
-				<h1 class="home-heading">Are you sure you want to delete<br><span class="name">{$title}?</span>.</h1>
+				<h1 class="home-heading">Are you sure you want to delete<br><span class="name">{$title}</span>?</h1>
 				<p class="lead">This can not be undone. Please dont cry if everything blows up.</p>
 				<form class="pure-form pure-form-stacked" action="." method="post">
 				<input type="hidden" name="title" value="{$title}">
