@@ -335,6 +335,9 @@ Contains the following view possibilities:
 	new
 	delete
 	logOut
+	about
+	features
+	support
 
 Default is the home page.
 
@@ -408,6 +411,41 @@ if(isset($_GET['page'])) {
 		unset($_SESSION['theme']);
 		session_destroy();
 		header('Location: /site');
+	} else if ($_GET['page'] == 'about') {
+		$alert = createAlert();
+		unset($_SESSION['alert']);
+		$body = createAbout($footer);
+		$viewText = '| About';
+	} else if ($_GET['page'] == 'features') {
+		$alert = createAlert();
+		unset($_SESSION['alert']);
+		$body = createFeatures($footer);
+		$viewText = '| Features';
+	} else if ($_GET['page'] == 'support') {
+		$alert = createAlert();
+		unset($_SESSION['support']);
+		$body = createSupport($footer);
+		$viewText = '| Support';
+	} else if ($_GET['page'] == 'settings') {
+		if ($loggedIn) {
+			$alert = createAlert();
+			unset($_SESSION['alert']);
+			$body = createSettings($footer);
+			$viewText = "| $lastName's Settings";
+		} else {
+			$_SESSION['alert'] = array('title' => 'Please Login.', 'message' => 'To view the previous page, you must be logged in.', 'status' => 'danger', 'show' => true);
+			header('Location: /site/?page=signIn');
+		}
+	} else if ($_GET['page'] == 'admin') {
+		if ($loggedIn) {
+			$alert = createAlert();
+			unset($_SESSION['alert']);
+			$body = createAdmin($footer);
+			$viewText = '| Admin';
+		} else {
+			$_SESSION['alert'] = array('title' => 'Please Login.', 'message' => 'To view the previous page, you must be logged in.', 'status' => 'danger', 'show' => true);
+			header('Location: /site/?page=signIn');
+		}
 	}
 }
 else {

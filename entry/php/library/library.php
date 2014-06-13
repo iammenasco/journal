@@ -44,9 +44,9 @@ This is a function to run the data received through a post and sanitize inputs.
 @return - Return the sanitized data.
 ****************/
 function testInput($data) {
-  $data = stripslashes($data);
-  $data = htmlspecialchars($data);
-  return $data;
+	$data = stripslashes($data);
+	$data = htmlspecialchars($data);
+	return $data;
 }
 /************
 Test Input
@@ -66,22 +66,21 @@ Creates Alert HTML for information and errors. Uses four types of popups to disp
 ****************/
 function createAlert(){
 	if (isset($_SESSION['alert']) && $_SESSION['alert']['show']) {
-	$title = $_SESSION['alert']['title'];
-	$message = $_SESSION['alert']['message'];
-	$status = $_SESSION['alert']['status'];
-	$alert = <<<HTML
-	<div class="alertPopup">
-		<div class="alert alert-{$status} alert-dismissable">
-			<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-			<strong>{$title}</strong> {$message}
+		$title = $_SESSION['alert']['title'];
+		$message = $_SESSION['alert']['message'];
+		$status = $_SESSION['alert']['status'];
+		$alert = <<<HTML
+		<div class="alertPopup">
+			<div class="alert alert-{$status} alert-dismissable">
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+				<strong>{$title}</strong> {$message}
+			</div>
 		</div>
-	</div>
 HTML;
-	return $alert;
-} else {
-	return FALSE;
-}
-
+		return $alert;
+	} else {
+		return FALSE;
+	}
 }
 /************
 End Alert
@@ -109,30 +108,30 @@ Also contains the active function, used to see if the current view matches that 
 function createNav($loggedIn, $lastName, $alertCount, $view) {
 	if ($loggedIn) {
 		$userItems = '
-			<li class="pure-menu-heading">Journals</li>
-			<li class="' . active($view, 'entries') . '"><a href="?page=entries">Entries</a></li>
-			<li class="' . active($view, 'logOut') . '"><a href="?page=logOut">Log out</a></li>
-			<li class="' . active($view, 'settings') . '"><a href="#">Settings</a></li>
-			<li class="' . active($view, 'admin') . '"><a href="#">Admin</a></li>';
-} else {
-	$userItems = '
-	<li class="pure-menu-heading"></li>
-	<li class="' . active($view, 'signIn') . '"><a href="?page=signIn">Log in</a></li>
-	<li class="' . active($view, 'signUp') . '"><a href="?page=signUp">Sign Up</a></li>';
-}
+		<li class="pure-menu-heading">Journals</li>
+		<li class="' . active($view, 'entries') . '"><a href="?page=entries">Entries</a></li>
+		<li class="' . active($view, 'logOut') . '"><a href="?page=logOut">Log out</a></li>
+		<li class="' . active($view, 'settings') . '"><a href="?page=settings">Settings</a></li>
+		<li class="' . active($view, 'admin') . '"><a href="?page=admin">Admin</a></li>';
+	} else {
+		$userItems = '
+		<li class="pure-menu-heading"></li>
+		<li class="' . active($view, 'signIn') . '"><a href="?page=signIn">Log in</a></li>
+		<li class="' . active($view, 'signUp') . '"><a href="?page=signUp">Sign Up</a></li>';
+	}
 	return '
-<a href="#menu" id="menuLink" class="menu-link">
-	<span></span>
-</a>
-<div id="menu">
-	<div class="pure-menu pure-menu-open">
-		<a class="pure-menu-heading" href="/site">I am <span class="name">' .  $lastName . '</span>.</a>
-		<ul id="std-menu-items">
-			<li class="menu-item-divided' . active($view, 'about') . '"><a href="#">About</a></li>
-			<li class="' . active($view, 'features') . '"><a href="#">Features</a></li>
-			<li class="' . active($view, 'support') . '"><a href="#">Support</a></li>'
-			. $userItems .
-			'<li>
+	<a href="#menu" id="menuLink" class="menu-link">
+		<span></span>
+	</a>
+	<div id="menu">
+		<div class="pure-menu pure-menu-open">
+			<a class="pure-menu-heading" href="/site">I am <span class="name">' .  $lastName . '</span>.</a>
+			<ul id="std-menu-items">
+				<li class="menu-item-divided' . active($view, 'about') . '"><a href="?page=about">About</a></li>
+				<li class="' . active($view, 'features') . '"><a href="?page=features">Features</a></li>
+				<li class="' . active($view, 'support') . '"><a href="?page=support">Support</a></li>'
+				. $userItems .
+				'<li>
 				<select class="menu-select" onChange="loadCSS(this.value);">
 					<option selected="selected" disabled="disabled">Theme</option>
 					<option value="blue">Blue</option>
@@ -154,8 +153,8 @@ function active($view, $page) {
 	if($view == $page) {
 		return ' pure-menu-selected';
 	} else {
-	return '';
-}
+		return '';
+	}
 }
 /************
 Create nav
@@ -217,18 +216,18 @@ function entryList($userID, $entries, $avatar) {
 		}
 		$name = entryName($entry['entryCreatedBy']);
 		$list .= <<<HTML
-	<li class="{$active}"><a href="#{$id}" data-toggle="tab">
-		<div class="entry-item pure-g">
-			<div class="pure-u">
-				{$avatar}
+		<li class="{$active}"><a href="#{$id}" data-toggle="tab">
+			<div class="entry-item pure-g">
+				<div class="pure-u">
+					{$avatar}
+				</div>
+				<div class="pure-u-3-4">
+					<h5 class="entry-name">{$name['userFirstName']} {$name['userLastName']}</h5>
+					<h4 class="entry-subject">{$title}</h4>
+					<p class="entry-desc">{$snip}</p>
+				</div>
 			</div>
-			<div class="pure-u-3-4">
-				<h5 class="entry-name">{$name['userFirstName']} {$name['userLastName']}</h5>
-				<h4 class="entry-subject">{$title}</h4>
-				<p class="entry-desc">{$snip}</p>
-			</div>
-		</div>
-	</a></li>
+		</a></li>
 HTML;
 		$i++;
 	}
@@ -273,26 +272,26 @@ function entryContent($userID, $entries, $footer) {
 		}
 		$name = entryName($entry['entryCreatedBy']);
 		$list .= <<<HTML
-	<div class="entry-content tab-pane {$active}" id="{$id}">
-		<div class="entry-content-header pure-g">
-			<div class="pure-u-1-2">
-				<h1 class="entry-content-title">{$subject}</h1>
-				<p class="entry-content-subtitle">From <a>{$name['userFirstName']} {$name['userLastName']}</a> at <span>{$time}</span>
-				</p>
+		<div class="entry-content tab-pane {$active}" id="{$id}">
+			<div class="entry-content-header pure-g">
+				<div class="pure-u-1-2">
+					<h1 class="entry-content-title">{$subject}</h1>
+					<p class="entry-content-subtitle">From <a>{$name['userFirstName']} {$name['userLastName']}</a> at <span>{$time}</span>
+					</p>
+				</div>
+				<div class="entry-content-controls pure-u-1-2">
+					<a href="?page=new" class="pure-button outline-inverse">New</a>
+					<a href="?page=new&amp;entry={$entry['entryID']}" class="pure-button outline-inverse">Edit</a>
+					<a href="?page=delete&amp;entry={$entry['entryID']}" class="pure-button outline-inverse">Delete</a>
+				</div>
 			</div>
-			<div class="entry-content-controls pure-u-1-2">
-				<a href="?page=new" class="pure-button outline-inverse">New</a>
-				<a href="?page=new&amp;entry={$entry['entryID']}" class="pure-button outline-inverse">Edit</a>
-				<a href="?page=delete&amp;entry={$entry['entryID']}" class="pure-button outline-inverse">Delete</a>
-			</div>
+			<div class="entry-content-body">{$content}</div>
+			{$footer}
 		</div>
-		<div class="entry-content-body">{$content}</div>
-		{$footer}
-	</div>
 HTML;
 		$i++;
 	}
-return $list;
+	return $list;
 }
 /************
 Create entry content
@@ -330,7 +329,7 @@ function createNewList($userID, $templates) {
 			</div>
 		</a></li>
 HTML;
-	$i++;
+		$i++;
 	}
 	return $list;
 }
@@ -421,32 +420,32 @@ function createNewEntry($userID, $templates, $footer) {
 			$active = '';
 		}
 		$list .='
-<div class="entry-content tab-pane' . $active . '" id="' . $templateID . '">
-	<form class="pure-form pure-form-stacked newEntry" action="." method="post">
-	<input type="hidden" name="entryID" value="' . $entryID . '">
-	<input type="hidden" name="templateID" value="' . $template['templateID'] . '">
-	<div class="entry-content-header pure-g">
-		<div class="pure-u-1-2">
-			<div class="pure-control-group">
-				' . $title . '
-			</div>
-			<p class="entry-content-subtitle">Created At <span>' . $time . '</span>
-			</p>
-		</div>
-		<div class="entry-content-controls pure-u-1-2">
-			<button type="submit" name="action" value="' . $value . '" class="pure-button outline-inverse">Submit</button>
-			<a href="?page=entries" class="pure-button outline-inverse">Cancel</a>
-		</div>
-	</div>
-	<div class="entry-content-body">
-		<div class="pure-control-group">
-			' . $start . $end . $url . $content . '
-		</div>
-	</div>
-	</form>
-	' . $footer . '
-</div>';
-	$i++;
+		<div class="entry-content tab-pane' . $active . '" id="' . $templateID . '">
+			<form class="pure-form pure-form-stacked newEntry" action="." method="post">
+				<input type="hidden" name="entryID" value="' . $entryID . '">
+				<input type="hidden" name="templateID" value="' . $template['templateID'] . '">
+				<div class="entry-content-header pure-g">
+					<div class="pure-u-1-2">
+						<div class="pure-control-group">
+							' . $title . '
+						</div>
+						<p class="entry-content-subtitle">Created At <span>' . $time . '</span>
+						</p>
+					</div>
+					<div class="entry-content-controls pure-u-1-2">
+						<button type="submit" name="action" value="' . $value . '" class="pure-button outline-inverse">Submit</button>
+						<a href="?page=entries" class="pure-button outline-inverse">Cancel</a>
+					</div>
+				</div>
+				<div class="entry-content-body">
+					<div class="pure-control-group">
+						' . $start . $end . $url . $content . '
+					</div>
+				</div>
+			</form>
+			' . $footer . '
+		</div>';
+		$i++;
 	}
 	return $list;
 }
@@ -482,11 +481,11 @@ function createDelete($userID, $footer) {
 				<h1 class="home-heading">Are you sure you want to delete<br><span class="name">{$title}</span>?</h1>
 				<p class="lead">This can not be undone. Please dont cry if everything blows up.</p>
 				<form class="pure-form pure-form-stacked" action="." method="post">
-				<input type="hidden" name="title" value="{$title}">
-				<input type="hidden" name="content" value="{$content}">
-				<input type="hidden" name="entryID" value="{$entryID}">
-				<button type="submit" name="action" value="delete" class="pure-button outline-inverse">Yes</button>
-				<a href="?page=entries" class="pure-button outline-inverse">No</a>
+					<input type="hidden" name="title" value="{$title}">
+					<input type="hidden" name="content" value="{$content}">
+					<input type="hidden" name="entryID" value="{$entryID}">
+					<button type="submit" name="action" value="delete" class="pure-button outline-inverse">Yes</button>
+					<a href="?page=entries" class="pure-button outline-inverse">No</a>
 				</form>
 			</div>
 			<div class="pure-u-1">
@@ -518,9 +517,9 @@ function createHome($footer) {
 		</div>
 		<div class="pure-g">
 			<div class="pure-u-1 construction">
-				<h1 class="home-heading">Under <span class="name">Construction</span>.</h1>
-				<p class="lead">Patience you must have, my young padawan. Things are changing up a bit. Frequent updates are on the way, check some of them out at the <span class="name">&beta;</span>eta page.</p>
-				<p class="lead"><a class="pure-button outline-inverse" href="http://beta.iammenasco.com">See the future.</a></p>
+				<h1 class="home-heading">Online <span class="name">Journal</span>.</h1>
+				<p class="lead">Welcome to iammenasco.com. Feel free to create a journal, and store many entries forever! If you are lost, check out some links on the site to get started</p>
+				<p class="lead"><a class="pure-button outline-inverse" href="/?page=signUp">Start!</a></p>
 			</div>
 			<div class="pure-u-1">
 				{$footer}
@@ -531,6 +530,171 @@ HTML;
 }
 /************
 Home Page
+**** END ****/
+
+/**** START ****
+About Page
+
+Displays the about page, with content about the site, and links to information about me.
+
+@param $footer - HTML of the Footer to be added at the bottom of each Entry.
+
+@return - HTML of the home page.
+****************/
+function createAbout($footer) {
+	return <<<HTML
+	<div class="main">
+		<div class="header">
+			<h1>I am <span class="name">Menasco</span>.</h1>
+			<h2>A magical place of hope and wonder</h2>
+		</div>
+		<div class="pure-g">
+			<div class="pure-u-1 construction">
+				<h1 class="home-heading">Under <span class="name">Construction</span>.</h1>
+				<p class="lead">Patience you must have, my young padawan. Things are changing up a bit. Frequent updates are on the way, check some of them out at the <span class="name">&beta;</span>eta page.</p>
+				<p class="lead"><a class="pure-button outline-inverse" href="/?page=signIn">See the future.</a></p>
+			</div>
+			<div class="pure-u-1">
+				{$footer}
+			</div>
+		</div>
+	</div>
+HTML;
+}
+/************
+About Page
+**** END ****/
+
+/**** START ****
+Features Page
+
+List of screen shots and explanations of the site, and how to use it.
+
+@param $footer - HTML of the Footer to be added at the bottom of each Entry.
+
+@return - HTML of the home page.
+****************/
+function createFeatures($footer) {
+	return <<<HTML
+	<div class="main">
+		<div class="header">
+			<h1>I am <span class="name">Menasco</span>.</h1>
+			<h2>A magical place of hope and wonder</h2>
+		</div>
+		<div class="pure-g">
+			<div class="pure-u-1 construction">
+				<h1 class="home-heading">Under <span class="name">Construction</span>.</h1>
+				<p class="lead">Patience you must have, my young padawan. Things are changing up a bit. Frequent updates are on the way, check some of them out at the <span class="name">&beta;</span>eta page.</p>
+				<p class="lead"><a class="pure-button outline-inverse" href="/?page=signIn">See the future.</a></p>
+			</div>
+			<div class="pure-u-1">
+				{$footer}
+			</div>
+		</div>
+	</div>
+HTML;
+}
+/************
+Features Page
+**** END ****/
+
+/**** START ****
+Support Page
+
+Displays list of QA and other helpful items for use of the site.
+
+@param $footer - HTML of the Footer to be added at the bottom of each Entry.
+
+@return - HTML of the home page.
+****************/
+function createSupport($footer) {
+	return <<<HTML
+	<div class="main">
+		<div class="header">
+			<h1>I am <span class="name">Menasco</span>.</h1>
+			<h2>A magical place of hope and wonder</h2>
+		</div>
+		<div class="pure-g">
+			<div class="pure-u-1 construction">
+				<h1 class="home-heading">Under <span class="name">Construction</span>.</h1>
+				<p class="lead">Patience you must have, my young padawan. Things are changing up a bit. Frequent updates are on the way, check some of them out at the <span class="name">&beta;</span>eta page.</p>
+				<p class="lead"><a class="pure-button outline-inverse" href="/?page=signIn">See the future.</a></p>
+			</div>
+			<div class="pure-u-1">
+				{$footer}
+			</div>
+		</div>
+	</div>
+HTML;
+}
+/************
+Support Page
+**** END ****/
+
+/**** START ****
+Settings Page
+
+Displays list settings the user can change and edit for their account.
+
+@param $footer - HTML of the Footer to be added at the bottom of each Entry.
+
+@return - HTML of the home page.
+****************/
+function createSettings($footer) {
+	return <<<HTML
+	<div class="main">
+		<div class="header">
+			<h1>I am <span class="name">Menasco</span>.</h1>
+			<h2>A magical place of hope and wonder</h2>
+		</div>
+		<div class="pure-g">
+			<div class="pure-u-1 construction">
+				<h1 class="home-heading">Under <span class="name">Construction</span>.</h1>
+				<p class="lead">Patience you must have, my young padawan. Things are changing up a bit. Frequent updates are on the way, check some of them out at the <span class="name">&beta;</span>eta page.</p>
+				<p class="lead"><a class="pure-button outline-inverse" href="/?page=signIn">See the future.</a></p>
+			</div>
+			<div class="pure-u-1">
+				{$footer}
+			</div>
+		</div>
+	</div>
+HTML;
+}
+/************
+Settings Page
+**** END ****/
+
+/**** START ****
+Admin Page
+
+Displays administrative pages for the site, including user privileges.
+
+@param $footer - HTML of the Footer to be added at the bottom of each Entry.
+
+@return - HTML of the home page.
+****************/
+function createAdmin($footer) {
+	return <<<HTML
+	<div class="main">
+		<div class="header">
+			<h1>I am <span class="name">Menasco</span>.</h1>
+			<h2>A magical place of hope and wonder</h2>
+		</div>
+		<div class="pure-g">
+			<div class="pure-u-1 construction">
+				<h1 class="home-heading">Under <span class="name">Construction</span>.</h1>
+				<p class="lead">Patience you must have, my young padawan. Things are changing up a bit. Frequent updates are on the way, check some of them out at the <span class="name">&beta;</span>eta page.</p>
+				<p class="lead"><a class="pure-button outline-inverse" href="/?page=signIn">See the future.</a></p>
+			</div>
+			<div class="pure-u-1">
+				{$footer}
+			</div>
+		</div>
+	</div>
+HTML;
+}
+/************
+Admin Page
 **** END ****/
 
 /**** START ****
