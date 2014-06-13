@@ -1,11 +1,17 @@
 <?php
-session_start();
-// Created by Brian Menasco
-// This work is licensed under a Creative Commons 
-// Attribution-NonCommercial-ShareAlike 4.0 International License.
 /**** START ****
-Site Purpose
+Session
 
+Ended upon logout.
+****************/
+session_start();
+
+/**** START ****
+Site Information
+
+Created by Brian Menasco
+This work is licensed under a Creative Commons 
+Attribution-NonCommercial-ShareAlike 4.0 International License.
 
 The purpose of my site is to allow people to keep online journals/diaries, allowing each entry to embed pictures, audio, and video. My site will allow people to have private and/or public journals where they can share entries, or even whole journals with others, or keep one for personal use. This will allow users to have collaborative journals, especially helpful for teams to share ideas or track various items together. The site can also be used by people who need to keep a log of work to share with their supervisors. This will be extremely useful for students who are required to keep logs for their internships to report back. My site will host various sources where people can find journal ideas, for those just starting off. I also want places where people can find information on journals, the importance of them.
 
@@ -40,38 +46,59 @@ Different Views:
 	Login page
 	Edit Entry
 
-
-
-Notes Section
+Information Section
 **** END ****/
 
 /**** START ****
-Test Content
+Includes
 
-The following content is used as dummy content to test the functions found on this page.
+Include the model and library.
 ****************/
-$alertCount = 2;
-$loggedIn = false;
-function testInput($data) {
-  $data = stripslashes($data);
-  $data = htmlspecialchars($data);
-  return $data;
-}
-/************
-Test Content
-**** END ****/
-
-if (is_readable('model/model.php')) {
-	require 'model/model.php';
+if (is_readable('php/model/model.php')) {
+	require 'php/model/model.php';
 } else {
 	header('location: /errordocs/500.php');
 }
+
+if (is_readable('php/library/library.php')) {
+	require 'php/library/library.php';
+} else {
+	header('location: /errordocs/500.php');
+}
+/************
+Includes
+**** END ****/
+
+/**** START ****
+Set default values
+
+Create session values, and include any personalization added by the user. Lastly, call the nav and footer so it can be included elsewhere.
+
+@param $alertCount - NOT USED: INT value of unseen alerts. For future use.
+@param $view - Default of the current page, used for the nav to highlight the current page.
+
+@param $loggedIn - Changes the value of loggedIn according to the session variable.
+@param $firstName - Sets the session value of firstName to a variable. Default is empty string.
+@param $lastName - Sets the session value of lastName to a variable. Default is empty string.
+@param $fullName - Concatenate firstName and lastName for easy use.
+@param $email - Sets the session value of email to a variable. Default is empty string.
+@param $color - If there is a custom color the user has saved, it will be stored.
+@param $theme - If there is a custom theme the user has saved, it will be stored.
+@param $userID - Sets the session value of email to a variable. Default is empty string.
+
+@param $colorCSS - Creates a CSS link used for the view to import the specific color css.
+
+@param $themeCSS - Creates a CSS link used for the view to import the specific theme css.
+
+@param $nav - Calls the createNav function and sets it to a variable.
+@param $footer -  Calls the createFooter function and sets it to a variable.
+****************/
+$alertCount = 2;
 if(isset($_GET['page'])) {
 	$view = $_GET['page'];
 } else {
 	$view = 'home';
 }
-
 if (isset($_SESSION['loggedIn']) && isset($_SESSION['loggedIn']) == TRUE) {
 	$loggedIn = $_SESSION['loggedIn'];
 	$firstName = $_SESSION['firstName'];
@@ -82,6 +109,7 @@ if (isset($_SESSION['loggedIn']) && isset($_SESSION['loggedIn']) == TRUE) {
 	$theme = $_SESSION['theme'];
 	$userID = $_SESSION['userID'];
 } else {
+	$loggedIn = FALSE;
 	$firstName = '';
 	$lastName = 'Menasco';
 	$fullName = '';
@@ -89,7 +117,6 @@ if (isset($_SESSION['loggedIn']) && isset($_SESSION['loggedIn']) == TRUE) {
 	$color = '';
 	$theme = '';
 	$userID = '';
-	$loggedIn = FALSE;
 }
 if ($color != '') {
 	$colorCSS = '<link rel="stylesheet" type="text/css" href="css/theme/' . $color . '.css" id="theme">';
@@ -103,7 +130,25 @@ if ($theme != '') {
 }
 $nav = createNav($loggedIn, $lastName, $alertCount, $view);
 $footer = createFooter();
+/************
+Default values
+**** END ****/
 
+
+/**** START ****
+POST Logic.
+
+This if statement goes through the possible values that come through a post, and what to do with them. It includes calls for validation/sanitation of data, communication to the model, and calling functions to prepare for the view.
+
+Contains the following post actions:
+	register
+	newEntry
+	updateEntry
+	delete
+	signIN
+
+Each statement sets the post values to variables, which are validated and sanitized. It then calls the specific function within the model, with error handling along the way.
+****************/
 if (isset($_POST['action'])) {
 	if ($_POST['action'] == 'register') {
 		$firstName = ucfirst(strtolower(testInput($_POST['firstName'])));
@@ -274,6 +319,33 @@ if (isset($_POST['action'])) {
 		}
 	}
 }
+/************
+Post Logic
+**** END ****/
+
+/**** START ****
+GET Logic.
+
+This if statement will run whenever someone goes to a new page. It calls the required functions to sent the view the required information for that page. 
+
+Contains the following view possibilities:
+	signUp
+	signIn
+	entries
+	new
+	delete
+	logOut
+
+Default is the home page.
+
+Each possibility contains the following variables that are used directly in the view.
+@variable $alert - Calls the createAlert function which sets the alert messages if any .
+@unset - Destroys the alert message once it is used.
+@variable $body - Used to create the various pages, and contains the markup displayed on the page.
+@variable $viewText - Contains the page title that changes with each view.
+
+Views that required logged in permission are checked and directed to the signIn page for the user to sign into.
+****************/
 if(isset($_GET['page'])) {
 	if ($_GET['page'] == 'signUp') {
 		$alert = createAlert();
@@ -343,584 +415,16 @@ else {
 	$alert = createAlert();
 	$viewText = '';
 }
-
-/**** START ****
-Set Session variables 
-****************/
-function createSession($userArray) {
-	$_SESSION['loggedIn'] = TRUE;
-	$_SESSION['userID'] = $userArray['userID'];
-	$_SESSION['lastName'] = $userArray['userLastName'];
-	$_SESSION['firstName'] = $userArray['userFirstName'];
-	$_SESSION['email'] = $userArray['userEmail'];
-	$_SESSION['color'] = $userArray['userColor'];
-	$_SESSION['theme'] = $userArray['userTheme'];
-	return TRUE;
-}
 /************
-Session Variables
-**** END ****/
-
-/**** START ****
-Create Alert for information and errors
-
-Uses four types of popups to display information
-	Green: Success
-	Blue: Info
-	Yellow: Warning
-	Red: danger
-****************/
-function createAlert(){
-	if (isset($_SESSION['alert']) && $_SESSION['alert']['show']) {
-	$title = $_SESSION['alert']['title'];
-	$message = $_SESSION['alert']['message'];
-	$status = $_SESSION['alert']['status'];
-	$alert = <<<HTML
-	<div class="alertPopup">
-		<div class="alert alert-{$status} alert-dismissable">
-			<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-			<strong>{$title}</strong> {$message}
-		</div>
-	</div>
-HTML;
-	return $alert;
-} else {
-	return false;
-}
-
-}
-/************
-End Alert
-**** END ****/
-
-/**** START ****
-Create nav
-
-Home - Current Journal
-About - About site w/ link to contact information
-Features - Screen Shots
-Support - QA/Contact information
----------
-Log in
-
-New Entry - New basic entry (Allow options of changing templates for time log etc)
-Share - Invite others to read it
-Alerts - If there are new comments on the post
-Families - List of public/private shared journals
----------
-Account
-Edit Journal - Private/Public 
-Admin - CMS Stuff
-Log out - Keep at the bottom?
-Theme - Dropdown color selector/changing thing
-****************/
-function createNav($loggedIn, $lastName, $alertCount, $view) {
-	if ($loggedIn) {
-		$userItems = '
-			<li class="pure-menu-heading">Journals</li>
-			<li class="' . active($view, 'entries') . '"><a href="?page=entries">Entries</a></li>
-			<li class="' . active($view, 'logOut') . '"><a href="?page=logOut">Log out</a></li>
-			<li class="' . active($view, 'settings') . '"><a href="#">Settings</a></li>
-			<li class="' . active($view, 'admin') . '"><a href="#">Admin</a></li>';
-} else {
-	$userItems = '
-	<li class="pure-menu-heading"></li>
-	<li class="' . active($view, 'signIn') . '"><a href="?page=signIn">Log in</a></li>
-	<li class="' . active($view, 'signUp') . '"><a href="?page=signUp">Sign Up</a></li>';
-}
-	return '
-<a href="#menu" id="menuLink" class="menu-link">
-	<span></span>
-</a>
-<div id="menu">
-	<div class="pure-menu pure-menu-open">
-		<a class="pure-menu-heading" href="/site">I am <span class="name">' .  $lastName . '</span>.</a>
-		<ul id="std-menu-items">
-			<li class="menu-item-divided' . active($view, 'about') . '"><a href="#">About</a></li>
-			<li class="' . active($view, 'features') . '"><a href="#">Features</a></li>
-			<li class="' . active($view, 'support') . '"><a href="#">Support</a></li>'
-			. $userItems .
-			'<li>
-				<select class="menu-select" onChange="loadCSS(this.value);">
-					<option selected="selected" disabled="disabled">Theme</option>
-					<option value="blue">Blue</option>
-					<option value="lime">Green</option>
-					<option value="orange">Orange</option>
-					<option value="pink">Pink</option>
-					<option value="purple">Purple</option>
-					<option value="red">Red</option>
-					<option value="white">White</option>
-					<option value="yellow">Yellow</option>
-				</select>
-			</li>
-		</ul>
-	</div>
-</div>';
-}
-
-function active($view, $page) {
-	if($view == $page) {
-		return ' pure-menu-selected';
-	} else {
-	return '';
-}
-}
-/************
-Create nav
-**** END ****/
-
-/**** START ****
-Get avatar
-
-Use Gravatar. Maybe just as an option. Users can opt-out, but use this service as default
-****************/
-function getAvatar($fullName, $email) {
-	$default = "http://www.gravatar.com/avatar/c8c1467507a042f49ab30024e6e7f6d9?s=64";
-	$url = "http://www.gravatar.com/avatar/" . md5( strtolower( trim( $email ) ) ) . "?d=" . urlencode( $default ) . "&amp;s=64";
-	return <<<HTML
-	<img class="entry-avatar" alt="{$fullName}&amp;#x27;s avatar" height="64" width="64" src="{$url}">
-HTML;
-}
-/************
-Get avatar
-**** END ****/
-
-/**** START ****
-Create entry list
-
-Populate a list of 10 most current entries with "Show More" button, or Lazy Load all in Desktop View
-****************/
-
-function entryList($userID, $entries, $avatar) {
-	$list = '';
-	$i = 0;
-	foreach ($entries as $entry) {
-		if (strlen($entry['entryTitle']) > 27) {
-			$title = substr($entry['entryTitle'], 0, 27) . '...';
-		} else {
-			$title = $entry['entryTitle'];
-		}
-		if (strlen($entry['entryContent']) > 75) {
-			$snip = substr($entry['entryContent'], 0, 75) . '...';
-		} else {
-			$snip = $entry['entryContent'];
-		}
-		$id = 'entry' . $entry['entryID'];
-		if ($i == 0) {
-			$active = ' active';
-		} else {
-			$active = '';
-		}
-		$name = entryName($entry['entryCreatedBy']);
-		$list .= <<<HTML
-	<li class="{$active}"><a href="#{$id}" data-toggle="tab">
-		<div class="entry-item pure-g">
-			<div class="pure-u">
-				{$avatar}
-			</div>
-			<div class="pure-u-3-4">
-				<h5 class="entry-name">{$name['userFirstName']} {$name['userLastName']}</h5>
-				<h4 class="entry-subject">{$title}</h4>
-				<p class="entry-desc">{$snip}</p>
-			</div>
-		</div>
-	</a></li>
-HTML;
-		$i++;
-	}
-	$list .= <<<HTML
-	<li>
-		<div class="entry-item pure-g">
-			<div class="pure-u-3-4">
-				<a href="?page=new" class="pure-button outline-inverse">New Entry</a>
-			</div>
-		</div>
-	</li>
-HTML;
-	return $list;
-}
-/************
-Create entry List
-**** END ****/
-
-/**** START ****
-Create entry content
-
-Possibilities for new entry templates(When the user clicks new)
-	Default - Journal. Just text. Maybe a picture.
-	Single photo uploading - One picture, see if I can get the location, time when the image was created... crap like that.
-	Study Journal - Book/Class field, notes
-	Travel Journal
-	Gratitude Journal
-	Time Log - Form of start time, end time, auto date, and description. Maybe location?
-	Bug Reports - Instead of undread - Mark as in progress or resolved or new
-		Fields can include location of bug (like a URL or something) screen shot, replication steps or whatever.
-
-****************/
-function entryContent($userID, $entries, $footer) {
-	$list = '';
-	$i = 0;
-	foreach ($entries as $entry) {
-		$subject = $entry['entryTitle'];
-		$time = date("g:ia, F jS, Y",strtotime($entry['entryTime']));
-		$content = $entry['entryContent'];
-		$id = 'entry' . $entry['entryID'];
-		if ($i == 0) {
-			$active = ' active';
-		} else {
-			$active = '';
-		}
-		$name = entryName($entry['entryCreatedBy']);
-		$list .= <<<HTML
-	<div class="entry-content tab-pane {$active}" id="{$id}">
-		<div class="entry-content-header pure-g">
-			<div class="pure-u-1-2">
-				<h1 class="entry-content-title">{$subject}</h1>
-				<p class="entry-content-subtitle">From <a>{$name['userFirstName']} {$name['userLastName']}</a> at <span>{$time}</span>
-				</p>
-			</div>
-			<div class="entry-content-controls pure-u-1-2">
-				<a href="?page=new" class="pure-button outline-inverse">New</a>
-				<a href="?page=new&amp;entry={$entry['entryID']}" class="pure-button outline-inverse">Edit</a>
-				<a href="?page=delete&amp;entry={$entry['entryID']}" class="pure-button outline-inverse">Delete</a>
-			</div>
-		</div>
-		<div class="entry-content-body">{$content}</div>
-		{$footer}
-	</div>
-HTML;
-		$i++;
-	}
-return $list;
-}
-/************
-Create entry content
-**** END ****/
-
-/**** START ****
-New/Edit List
-****************/
-function createNewList($userID, $templates) {
-	$list = '';
-	$i = 0;
-	foreach ($templates as $template) {
-		$title = $template['templateTitle'];
-		$snip = $template['templateDescription'];
-		$id = 'template' . $template['templateID'];
-		if ($i == 0) {
-			$active = ' active';
-		} else {
-			$active = '';
-		}
-		$list .= <<<HTML
-		<li class="{$active}"><a href="#{$id}" data-toggle="tab">
-			<div class="entry-item pure-g">
-				<div class="pure-u-3-4">
-					<h4 class="entry-subject">{$title}</h4>
-					<p class="entry-desc">{$snip}</p>
-				</div>
-			</div>
-		</a></li>
-HTML;
-	$i++;
-	}
-	return $list;
-}
-/************
-New/Edit List
-**** END ****/
-
-/**** START ****
-New/Edit Entry
-
-Create a new entry or edit an existing one. Depending on the template, the view will display other things, each item needs to see if it should be included within the template.
-
-****************/
-function createNewEntry($userID, $templates, $footer) {
-	$list = '';
-	$i = 0;
-	if(isset($_GET['entry'])) {
-		$entryID = $_GET['entry'];
-		$entry = listSingle($userID, $entryID);
-		$entryTitle = $entry['entryTitle'];
-		$entryContent = $entry['entryContent'];
-		$displayTime = date("g:ia, F jS, Y",strtotime($entry['entryTime']));
-		$entryURL = $entry['entryURL'];
-		$entryStartTime = $entry['entryStartTime'];
-		$entryEndTime = $entry['entryEndTime'];
-		$value = 'updateEntry';
-	} else {
-		$entryID = '';
-		$entryTitle = '';
-		$entryContent = '';
-		$displayTime = date("g:ia, F jS, Y", time());
-		$entryURL = '';
-		$entryStartTime = '';
-		$entryEndTime = '';
-		$value = 'newEntry';
-	}
-	$name = entryName($userID);
-	foreach ($templates as $template) {
-		if ($template['templateEntryTitle'] == 1) {
-			$title = '<label for="title">Title</label><textarea id="title" rows="1" placeholder="Title" name="title">' . $entryTitle .'</textarea>';
-		} else {
-			$title = '<input type="hidden" name="title" value="' . $entryTitle .'">';
-		}
-
-		if ($template['templateTime'] == 1) {
-			$time = $displayTime;
-		} else {
-			$time = '';
-		}
-
-		if ($template['templateContent'] == 1) {
-			$content = '<label for="entry">Entry</label><textarea id="entry" rows="15" cols="50" placeholder="Entry" name="content">' . $entryContent . '</textarea>';
-		} else {
-			$content = '<input type="hidden" name="content" value="' . $entryContent . '">';
-		}
-
-		if ($template['templateURL'] == 1) {
-			$url = '<label for="url">URL</label><textarea id="url" rows="1" cols="50" placeholder="URL" name="url">' . $entryURL .'</textarea>';
-		} else {
-			$url = '<input type="hidden" name="url" value="' . $entryURL . '">';
-		}
-
-		if ($template['templateStartTime'] == 1) {
-			$start = '<label for="start">Start Time</label><textarea id="start" rows="1" cols="50" placeholder="Start Time" name="start">' . $entryStartTime .'</textarea>';
-		} else {
-			$start = '<input type="hidden" name="start" value="' . $entryStartTime . '">';
-		}
-
-		if ($template['templateEndTime'] == 1) {
-			$end = '<label for="end">URL</label><textarea id="end" rows="1" cols="50" placeholder="End Time" name="end">' . $entryEndTime .'</textarea>';
-		} else {
-			$end = '<input type="hidden" name="end" value="' . $entryEndTime . '">';
-		}
-		// $file = $template['templateFile'];
-		$templateID = 'template' . $template['templateID'];
-		if ($i == 0) {
-			$active = ' active';
-		} else {
-			$active = '';
-		}
-		$list .='
-<div class="entry-content tab-pane' . $active . '" id="' . $templateID . '">
-	<form class="pure-form pure-form-stacked newEntry" action="." method="post">
-	<input type="hidden" name="entryID" value="' . $entryID . '">
-	<input type="hidden" name="templateID" value="' . $template['templateID'] . '">
-	<div class="entry-content-header pure-g">
-		<div class="pure-u-1-2">
-			<div class="pure-control-group">
-				' . $title . '
-			</div>
-			<p class="entry-content-subtitle">Created At <span>' . $time . '</span>
-			</p>
-		</div>
-		<div class="entry-content-controls pure-u-1-2">
-			<button type="submit" name="action" value="' . $value . '" class="pure-button outline-inverse">Submit</button>
-			<a href="?page=entries" class="pure-button outline-inverse">Cancel</a>
-		</div>
-	</div>
-	<div class="entry-content-body">
-		<div class="pure-control-group">
-			' . $start . $end . $url . $content . '
-		</div>
-	</div>
-	</form>
-	' . $footer . '
-</div>';
-	$i++;
-	}
-	return $list;
-}
-/************
-New/Edit Entry
-**** END ****/
-
-/**** START ****
-Delete Entry
-****************/
-function createDelete($userID, $footer) {
-	if(isset($_GET['entry'])) {
-		$entryID = $_GET['entry'];
-		$entry = listSingle($userID, $entryID);
-		$title = $entry['entryTitle'];
-		$content = $entry['entryContent'];
-	}
-	return <<<HTML
-	<div class="main">
-		<div class="header">
-			<h1>I am <span class="name">Menasco</span>.</h1>
-			<h2>A magical place of hope and wonder</h2>
-		</div>
-		<div class="pure-g">
-			<div class="pure-u-1 construction">
-				<h1 class="home-heading">Are you sure you want to delete<br><span class="name">{$title}</span>?</h1>
-				<p class="lead">This can not be undone. Please dont cry if everything blows up.</p>
-				<form class="pure-form pure-form-stacked" action="." method="post">
-				<input type="hidden" name="title" value="{$title}">
-				<input type="hidden" name="content" value="{$content}">
-				<input type="hidden" name="entryID" value="{$entryID}">
-				<button type="submit" name="action" value="delete" class="pure-button outline-inverse">Yes</button>
-				<a href="?page=entries" class="pure-button outline-inverse">No</a>
-				</form>
-			</div>
-			<div class="pure-u-1">
-				{$footer}
-			</div>
-		</div>
-	</div>
-HTML;
-}
-/************
-Delete Entry
-**** END ****/
-
-/**** START ****
-Home Page
-****************/
-function createHome($footer) {
-	return <<<HTML
-	<div class="main">
-		<div class="header">
-			<h1>I am <span class="name">Menasco</span>.</h1>
-			<h2>A magical place of hope and wonder</h2>
-		</div>
-		<div class="pure-g">
-			<div class="pure-u-1 construction">
-				<h1 class="home-heading">Under <span class="name">Construction</span>.</h1>
-				<p class="lead">Patience you must have, my young padawan. Things are changing up a bit. Frequent updates are on the way, check some of them out at the <span class="name">&beta;</span>eta page.</p>
-				<p class="lead"><a class="pure-button outline-inverse" href="http://beta.iammenasco.com">See the future.</a></p>
-			</div>
-			<div class="pure-u-1">
-				{$footer}
-			</div>
-		</div>
-	</div>
-HTML;
-}
-/************
-Home Page
-**** END ****/
-
-/**** START ****
-Sign in
-****************/
-function createSignIn($footer) {
-	return <<<HTML
-	<div class="main">
-		<div class="header">
-			<h1>I am <span class="name">Menasco</span>.</h1>
-			<h2>A magical place of hope and wonder</h2>
-		</div>
-		<form class="pure-form pure-form-aligned signIn" action="." method="post">
-			<fieldset>
-				<div class="pure-control-group">
-					<label for="email">Email Address</label>
-					<input id="email" class="form" name="email" type="email" placeholder="Email Address">
-				</div>
-				<div class="pure-control-group">
-					<label for="password">Password</label>
-					<input id="password" type="password" name="password" placeholder="Password">
-				</div>
-			</fieldset>
-			<div class="pure-controls">
-				<label for="cb" class="pure-checkbox">
-					<input id="cb" type="checkbox" class="remember"> Will you remember me?
-				</label>
-				<button type="submit" name="action" value="signIn" class="pure-button outline-inverse">Go</button>
-				<p><a class="name" href="./?page=signUp">Sign Up... </a></p>
-			</div>
-		</form>
-		<div class="pure-u-1">
-			{$footer}
-		</div>
-	</div>
-HTML;
-}
-/************
-Sign in
-**** END ****/
-
-/**** START ****
-Sign up
-****************/
-function createSignUp($footer) {
-	return <<<HTML
-	<div class="main">
-		<div class="header">
-			<h1>I am <span class="name">Menasco</span>.</h1>
-			<h2>A magical place of hope and wonder</h2>
-		</div>
-		<form class="pure-form pure-form-aligned signIn" action="." method="post">
-			<fieldset>
-				<div class="pure-control-group">
-					<label for="firstName">First Name</label>
-					<input id="firstName" placeholder="First Name" name="firstName">
-				</div>
-				<div class="pure-control-group">
-					<label for="lastName">Last Name</label>
-					<input id="lastName"  placeholder="Last Name" name="lastName">
-				</div>
-			</fieldset>
-			<fieldset>
-				<div class="pure-control-group">
-					<label for="email">Email Address</label>
-					<input id="email" type="email" placeholder="Email Address" name="email">
-				</div>
-				<div class="pure-control-group">
-					<label for="password">Password</label>
-					<input id="password" type="password" placeholder="Password" name="password">
-				</div>
-				<div class="pure-control-group">
-					<label for="password2">Confirm Password</label>
-					<input id="password2" type="password" placeholder="Password" name="password2">
-				</div>
-			</fieldset>
-			<div class="pure-controls">
-				<button type="submit" name="action" value="register" class="pure-button outline-inverse signUp">Submit</button>
-			</div>
-		</form>
-		<div class="pure-u-1">
-			{$footer}
-		</div>
-	</div>
-HTML;
-}
-/************
-Sign up
-**** END ****/
-
-/**** START ****
-Footer
-****************/
-function createFooter() {
-	return <<<HTML
-	<div class="mastfoot">
-		<div class="inner">
-			<p>See more on my <a href="http://portfolio.iammenasco.com">Portfolio</a>, by <a href="https://twitter.com/iammenasco">@iammenasco</a>.</p>
-			<a href="http://beta.iammenasco.com/foreach">Teaching Presentation! </a>
-			<a href="http://www.arvixe.com" target="_blank">Hosted By Arvixe</a>
-		</div>
-	</div>
-HTML;
-}
-/************
-Footer
-**** END ****/
-
-/**** START ****
-Testing view
-****************/
-
-/************
-Testing view
+GET Logic
 **** END ****/
 
 /**** START ****
 Includes
+
+View
 ****************/
-include 'view.php';
+require 'php/view/view.php';
 /************
 Includes
 **** END ****/
