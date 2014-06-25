@@ -163,7 +163,7 @@ if (isset($_POST['action'])) {
 		if (!empty($firstName) &&
 			!empty($lastName) &&
 			!empty($email) &&
-			filter_var($email, FILTER_VALIDATE_EMAIL) &&
+			filter_var(filter_var($email, FILTER_VALIDATE_EMAIL), FILTER_SANITIZE_EMAIL) &&
 			!empty($password) &&
 			!empty($password2) &&
 			$password == $password2) {
@@ -370,7 +370,7 @@ if(isset($_GET['page'])) {
 			$body .= entryList($userID, $entries, $avatar);
 			$body .= '</ul><div class="pure-1 entry tab-content">';
 			$body .= entryContent($userID, $entries, $footer);
-			$body .= '</div>';
+			$body .= '</div></div>';
 			$viewText = '| Entries';
 		} else {
 			$_SESSION['alert'] = array('title' => 'Please Login.', 'message' => 'To view the previous page, you must be logged in.', 'status' => 'danger', 'show' => true);

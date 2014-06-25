@@ -19,6 +19,9 @@ body {
 .pure-button,
 .pure-button:hover,
 .pure-button:focus {
+	-webkit-transition: .5s;
+	-moz-transition: .5s;
+	transition: .5s;
 	text-shadow: none; /* Prevent inheritence from `body` */
 	background-color: #fff;
 	border: 1px solid #fff;
@@ -125,6 +128,9 @@ body {
 	color: #368DDA;
 }
 a {
+	-webkit-transition: .25s;
+	-moz-transition: .25s;
+	transition: .25s;
 	color: #ccc;
 }
 .tab-content > .tab-pane {
@@ -257,4 +263,52 @@ button.close {
 	cursor: pointer;
 	background: transparent;
 	border: 0;
+}
+.about {
+	text-align: center;
+	height: auto;
+	max-width: 900px;
+	margin-left: auto;
+	margin-right: auto;
+}
+.icon {
+	width: 25%;
+	height: 140px;
+	font-size: 700%;
+	-webkit-transition: .5s;
+	-moz-transition: .5s;
+	transition: .5s;
+}
+.icon:hover {
+	text-shadow: 0 0 15px #368DDA;
+	font-size: 710%;
+}
+.aboutCol{
+	width: 46%;
+	text-align: left;
+	margin: 2%;
+}
+.navIcon {
+	font-size: 150%;
+	margin-right: 5%;
+	position: relative;
+	top: 3px;
+	text-align: center;
+}
+.deleteIcon {
+	color: orangered;
+	font-size: 700%;
+}
+.delete {
+	margin-top: 10%;
+	margin-bottom: 10%;
+}
+.entryIcon  {
+	margin-right: 6px;
+	font-size: 150%;
+	position: relative;
+	top: 3px;
+}
+.blah {
+	width: 15%;
 }

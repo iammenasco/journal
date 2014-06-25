@@ -56,3 +56,6 @@
 .pure-form input[type=email] {
 	border-color: violet;
 }
+.icon:hover {
+	text-shadow: 0 0 15px violet;
+}

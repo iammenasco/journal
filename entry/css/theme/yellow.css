@@ -1,58 +1,61 @@
 .name {
-	color: yellow;
+	color: #F1C40F;
 }
 .outline-inverse {
-	border-color: yellow
+	border-color: #F1C40F
 }
 
 .outline-inverse:hover, .btn-outline-inverse:focus, .btn-outline-inverse:active {
-	color: yellow;
+	color: #F1C40F;
 }
 .entry-item {
-	border-bottom: 1px solid yellow;
+	border-bottom: 1px solid #F1C40F;
 }
 .entry-item-unread {
-	border-left: 6px solid yellow;
+	border-left: 6px solid #F1C40F;
 }
 .entryList {
-	border-right: 1px solid yellow;
+	border-right: 1px solid #F1C40F;
 }
 #menu .pure-menu ul,
 #menu .pure-menu .menu-item-divided {
-	border-top: 1px solid yellow;
+	border-top: 1px solid #F1C40F;
 }
 #menu .pure-menu-selected{
-	border-left: 5px solid yellow;
+	border-left: 5px solid #F1C40F;
 }
 .pure-menu .pure-menu-heading {
-	border-bottom-color: yellow;
+	border-bottom-color: #F1C40F;
 }
 .entry-content-header {
-	border-bottom: 1px solid yellow;
+	border-bottom: 1px solid #F1C40F;
 }
 .mastfoot {
-	border-top: 1px solid yellow;
+	border-top: 1px solid #F1C40F;
 }
 .header {
-	border-bottom: 1px solid yellow;
+	border-bottom: 1px solid #F1C40F;
 }
 .mastfoot > .inner > p > a:hover {
-	color: yellow;
+	color: #F1C40F;
 }
 .mastfoot > .inner > a:hover {
-	color: yellow;
+	color: #F1C40F;
 }
 .pure-form input:not([type]):focus,
 .pure-form input[type=password]:focus,
 .pure-form-stacked textarea:focus,
 .pure-form input[type=email]:focus {
-	border-color: yellow;
-	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px yellow;
-	box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px yellow;
+	border-color: #F1C40F;
+	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px #F1C40F;
+	box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px #F1C40F;
 }
 .pure-form input:not([type]),
 .pure-form input[type=password],
 .pure-form-stacked textarea,
 .pure-form input[type=email] {
-	border-color: yellow;
+	border-color: #F1C40F;
+}
+.icon:hover {
+	text-shadow: 0 0 15px #F1C40F;
 }

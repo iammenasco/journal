@@ -9,6 +9,7 @@
 	<link type="text/css" rel="stylesheet" href="css/entry.css">
 	<link type="text/css" rel="stylesheet" href="css/side-menu.css">
 	<link type="text/css" rel="stylesheet" href="css/custom.css">
+	<link href="http://code.ionicframework.com/ionicons/1.5.2/css/ionicons.min.css" rel="stylesheet" type="text/css" />
 	<?php echo $themeCSS; ?>
 	<?php echo $colorCSS; ?>
 </head>
