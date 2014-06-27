@@ -162,6 +162,15 @@ function active($view, $page) {
 Create nav
 **** END ****/
 
+/**** START ****
+Check nav
+
+Adds the user created CMS pages to the Nav. It first runs a function to see if the page is currently active, and then renders the Link, with the correct title, class, and url.
+
+@param $view - The current view of the page. Used to send to the active() function, for highlighting active pages on the nav.
+
+@return - Returns <li>s of all the active Nav links.
+****************/
 function checkNav($view) {
 	$links = '';
 	$items = getCMSNav();
@@ -173,7 +182,20 @@ function checkNav($view) {
 	}
 	return $links;
 }
+/************
+Check nav
+**** END ****/
 
+/**** START ****
+Create CMS page
+
+For pages that were created within the CMS, this function will take the requested page from the DB, and put everything in the right spot for the page.
+
+@param $page - Array of the page, and all its content.
+@param $footer - HTML of the Footer to be added at the bottom of the page.
+
+@return - HTML of the requested CMS page.
+****************/
 function createCMSPage($page, $footer) {
 	$title = $page['pageTitle'];
 	$desc = $page['pageDesc'];
@@ -197,6 +219,72 @@ function createCMSPage($page, $footer) {
 	</div>
 HTML;
 }
+/************
+Create CMS page
+**** END ****/
+
+/**** START ****
+Create News
+
+Utilizes the GitHub API. For each commit, create a short version of what changed, who did it, and when.
+
+@param $footer - HTML of the Footer to be added at the bottom of the page.
+
+@return - HTML for news page to give updates for each commit.
+****************/
+function createNews($footer) {
+	$list = '';
+	$url = 'https://api.github.com/repos/iammenasco/journal/commits';
+	$curl_handle=curl_init();
+	curl_setopt($curl_handle, CURLOPT_URL, $url);
+	curl_setopt($curl_handle, CURLOPT_CONNECTTIMEOUT, 2);
+	curl_setopt($curl_handle, CURLOPT_RETURNTRANSFER, 1);
+	curl_setopt($curl_handle, CURLOPT_USERAGENT, 'I am Menasco');
+	$query = curl_exec($curl_handle);
+	curl_close($curl_handle);
+	$json = json_decode($query,true);
+	foreach ($json as $commit) {
+		$authorName = $commit['commit']['author']['name'];
+		$authorEmail = $commit['commit']['author']['email'];
+		$commitDate = date("g:ia, F jS, Y",strtotime($commit['commit']['author']['date']));
+		$message = $commit['commit']['message'];
+		$url = $commit['html_url'];
+		$titlePosition = strpos($message, PHP_EOL);
+		$title = '';
+		$description = '';
+		if (!$titlePosition) {
+			$title = $message;
+		} else {
+			$messageLength = strlen($message);
+			$title = substr($message, 0, $titlePosition);
+			$description = substr($message, $titlePosition, $messageLength);
+		}
+		$list .= <<<HTML
+		<div class="pure-u-1">
+			<h1 class="home-heading">{$title}</h1>
+			<p class="lead">{$description}</p>
+			<p class="lead"><a class="pure-button outline-inverse" href="{$url}">View Changes.</a></p>
+		</div>
+HTML;
+	}
+	return <<<HTML
+	<div class="main">
+		<div class="header">
+			<h1>I am <span class="name">Menasco</span>.</h1>
+			<h2>A magical place of hope and wonder</h2>
+		</div>
+		<div class="pure-g">
+			{$list}
+			<div class="pure-u-1">
+				{$footer}
+			</div>
+		</div>
+	</div>
+HTML;
+}
+/************
+Create News
+**** END ****/
 
 /**** START ****
 Get avatar

@@ -383,16 +383,17 @@ function validPage($page) {
 	$con = con();
 	try {
 		$query = 
-		'SELECT :pageTitle
+		'SELECT pageActive
 		FROM pages
-		WHERE pageActive = TRUE;';
+		WHERE pageActive = TRUE
+		AND pageURL = :pageURL;';
 		$stmt = $con->prepare($query);
-		$stmt->bindParam(':pageTitle', $page, PDO::PARAM_STR);
+		$stmt->bindParam(':pageURL', $page, PDO::PARAM_STR);
 		$stmt->execute();
 		$result = $stmt->fetch(PDO::FETCH_ASSOC);
 		$stmt->closeCursor();
 		if (!empty($result)) {
-			return $result;
+			return TRUE;
 		} else {
 			return FALSE;
 		}

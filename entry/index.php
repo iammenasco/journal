@@ -449,11 +449,18 @@ if(isset($_GET['page'])) {
 			$_SESSION['alert'] = array('title' => 'Please Login.', 'message' => 'To view the previous page, you must be logged in.', 'status' => 'danger', 'show' => true);
 			header('Location: /journal/entry/?page=signIn');
 		}
+	} else if ($_GET['page'] == 'news') {
+		$body = createNews($footer);
+		$viewText = '| News';
+		$alert = createAlert();
+		unset($_SESSION['alert']);
 	} else if (validPage($_GET['page'])) {
 		$page = getCreatedPage($_GET['page']);
 		$body = createCMSPage($page, $footer);
 		$viewText = '| '. $page['pageTitle'];
 		$alert = createAlert();
+	} else if (!validPage($_GET['page'])) {
+		header('Location: 404.shtml');
 	}
 }
 else {
