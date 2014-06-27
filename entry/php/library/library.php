@@ -106,6 +106,7 @@ Also contains the active function, used to see if the current view matches that 
 @return - If it matches, it returns the class used to highlight that item in the nav.
 ****************/
 function createNav($loggedIn, $lastName, $alertCount, $view) {
+	$cmsNav = checkNav($view);
 	if ($loggedIn) {
 		$userItems = '
 		<li class="pure-menu-heading">Journals</li>
@@ -125,13 +126,13 @@ function createNav($loggedIn, $lastName, $alertCount, $view) {
 	</a>
 	<div id="menu">
 		<div class="pure-menu pure-menu-open">
-			<a title="Home" class="pure-menu-heading" href="/site">I am <span class="name">' .  $lastName . '</span>.</a>
+			<a title="Home" class="pure-menu-heading" href="/journal/entry">I am <span class="name">' .  $lastName . '</span>.</a>
 			<ul id="std-menu-items">
 				<li class="menu-item-divided' . active($view, 'about') . '"><a title="About" href="?page=about"><span class="blah navIcon ion-ios7-information"></span>About</a></li>
 				<li class="' . active($view, 'features') . '"><a title="Features" href="?page=features"><span class="navIcon ion-lightbulb"></span>Features</a></li>
 				<li class="' . active($view, 'support') . '"><a title="Support" href="?page=support"><span class="navIcon ion-ios7-help"></span>Support</a></li>
 				<li class="' . active($view, 'news') . '"><a title="News" href="?page=news"><span class="navIcon ion-ios7-paper"></span>News</a></li>'
-				. $userItems .
+				. $cmsNav . $userItems .
 				'<li>
 				<select class="menu-select" onChange="loadCSS(this.value);">
 					<option selected="selected" disabled="disabled">Theme</option>
@@ -160,6 +161,42 @@ function active($view, $page) {
 /************
 Create nav
 **** END ****/
+
+function checkNav($view) {
+	$links = '';
+	$items = getCMSNav();
+	foreach ($items as $item) {
+		$title = $item['pageNav'];
+		$class = $item['pageClass'];
+		$url = $item['pageURL'];
+		$links .= '<li class="' . active($view, $url) . '"><a title="' . $title . '" href="?page=' . $url . '"><span class="navIcon ' . $class . '"></span>' . $title . '</a></li>';
+	}
+	return $links;
+}
+
+function createCMSPage($page, $footer) {
+	$title = $page['pageTitle'];
+	$desc = $page['pageDesc'];
+	$content = $page['pageContent'];
+	return <<<HTML
+	<div class="main">
+		<div class="header">
+			<h1>{$title}</h1>
+			<h2>{$desc}</h2>
+		</div>
+		<div class="pure-g">
+			<div class="pure-u-1 construction">
+				<h1 class="home-heading">Under <span class="name">Construction</span>.</h1>
+				<p class="lead">{$content}</p>
+				<p class="lead"><a class="pure-button outline-inverse" href="/?page=signIn">See the future.</a></p>
+			</div>
+			<div class="pure-u-1">
+				{$footer}
+			</div>
+		</div>
+	</div>
+HTML;
+}
 
 /**** START ****
 Get avatar

@@ -369,4 +369,103 @@ function getTemplates() {
 /************
 Get all Templates
 **** END ****/
+
+/**** START ****
+Valid page
+
+Checks to see if the page was created and exists within the database
+
+@param $page - Page requested for the view
+
+@return - Returns true if the page exists, and false if it is not there.
+****************/
+function validPage($page) {
+	$con = con();
+	try {
+		$query = 
+		'SELECT :pageTitle
+		FROM pages
+		WHERE pageActive = TRUE;';
+		$stmt = $con->prepare($query);
+		$stmt->bindParam(':pageTitle', $page, PDO::PARAM_STR);
+		$stmt->execute();
+		$result = $stmt->fetch(PDO::FETCH_ASSOC);
+		$stmt->closeCursor();
+		if (!empty($result)) {
+			return $result;
+		} else {
+			return FALSE;
+		}
+	} catch (PDOException $e) {
+		return FALSE;
+	}
+}
+/************
+Valid Page
+**** END ****/
+
+/**** START ****
+Get Created Page
+
+For pages created from the CMS, it checks the gets the content for the requested page.
+
+@param $page - Page requested for the view
+
+@return - Returns the page content for each page on the CMS. Returns false if it is not there
+****************/
+function getCreatedPage($page) {
+	$con = con();
+	try {
+		$query = 
+		'SELECT * FROM pages
+		WHERE pageTitle = :pageTitle';
+		$stmt = $con->prepare($query);
+		$stmt->bindParam(':pageTitle', $page, PDO::PARAM_STR);
+		$stmt->execute();
+		$result = $stmt->fetch(PDO::FETCH_ASSOC);
+		$stmt->closeCursor();
+		if (!empty($result)) {
+			return $result;
+		} else {
+			return FALSE;
+		}
+	} catch (PDOException $e) {
+		return FALSE;
+	}
+}
+/************
+Get Created Page
+**** END ****/
+
+/**** START ****
+Get Created Page Nav
+
+For each of the created pages from the CMS, it gets the NAV items
+
+@param $page - Page requested for the view
+
+@return - Returns the page content for each page on the CMS. Returns false if it is not there
+****************/
+function getCMSNav() {
+	$con = con();
+	try {
+		$query = 
+		'SELECT pageNav, pageClass, pageURL FROM pages
+		WHERE pageActive = TRUE;';
+		$stmt = $con->prepare($query);
+		$stmt->execute();
+		$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		$stmt->closeCursor();
+		if (!empty($result)) {
+			return $result;
+		} else {
+			return FALSE;
+		}
+	} catch (PDOException $e) {
+		return FALSE;
+	}
+}
+/************
+Get Created Page
+**** END ****/
 ?>
