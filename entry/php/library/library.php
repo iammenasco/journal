@@ -200,17 +200,25 @@ function createCMSPage($page, $footer) {
 	$title = $page['pageTitle'];
 	$desc = $page['pageDesc'];
 	$content = $page['pageContent'];
+	$link = $page['pageLink'];
+	$text = $page['pageButton'];
+	if ($link != '' or $link != NULL) {
+		$button = '<p class="lead"><a class="pure-button outline-inverse" href="' . $link . '">' . $text . '</a></p>';
+	} else {
+		$button = '';
+	}
 	return <<<HTML
 	<div class="main">
 		<div class="header">
-			<h1>{$title}</h1>
-			<h2>{$desc}</h2>
+			<h1>I am <span class="name">Menasco</span>.</h1>
+			<h2>A magical place of hope and wonder</h2>
 		</div>
 		<div class="pure-g">
 			<div class="pure-u-1 construction">
-				<h1 class="home-heading">Under <span class="name">Construction</span>.</h1>
+				<h1 class="home-heading">{$title}</h1>
+				<h2>{$desc}</h2>
 				<p class="lead">{$content}</p>
-				<p class="lead"><a class="pure-button outline-inverse" href="/?page=signIn">See the future.</a></p>
+				{$button}
 			</div>
 			<div class="pure-u-1">
 				{$footer}
@@ -250,6 +258,11 @@ function createNews($footer) {
 		$message = $commit['commit']['message'];
 		$url = $commit['html_url'];
 		$titlePosition = strpos($message, PHP_EOL);
+		if ($commit['author']['avatar_url']) {
+			$avatar = $commit['author']['avatar_url'];
+		} else {
+			$avatar = 'http://www.gravatar.com/avatar/c8c1467507a042f49ab30024e6e7f6d9?s=32';
+		}
 		$title = '';
 		$description = '';
 		if (!$titlePosition) {
@@ -260,15 +273,15 @@ function createNews($footer) {
 			$description = substr($message, $titlePosition, $messageLength);
 		}
 		$list .= <<<HTML
-		<div class="pure-u-1">
+		<div class="pure-u-1 commit">
 			<h1 class="home-heading">{$title}</h1>
-			<p class="lead">{$description}</p>
-			<p class="lead"><a class="pure-button outline-inverse" href="{$url}">View Changes.</a></p>
+			<h3><img align="middle" class="commit-avatar" title="{$authorName}" alt="{$authorName}&amp;#x27;s avatar" height="32" width="32" src="{$avatar}"> Changes by <span class="name">{$authorName}</span> at {$commitDate}</h3>
+			<p><a class="pure-button outline-inverse changes" title="View changes for {$title}" href="{$url}"><span class="changeIcon ion-fork-repo"></span>View Changes</a>{$description}</p>
 		</div>
 HTML;
 	}
 	return <<<HTML
-	<div class="main">
+	<div class="news">
 		<div class="header">
 			<h1>I am <span class="name">Menasco</span>.</h1>
 			<h2>A magical place of hope and wonder</h2>

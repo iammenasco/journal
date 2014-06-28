@@ -95,6 +95,7 @@ Create session values, and include any personalization added by the user. Lastly
 
 @param $nav - Calls the createNav function and sets it to a variable.
 @param $footer -  Calls the createFooter function and sets it to a variable.
+@function date_default_timezone_set - Sets the default timezone to me.
 ****************/
 $alertCount = 2;
 if(isset($_GET['page'])) {
@@ -133,6 +134,7 @@ if ($theme != '') {
 }
 $nav = createNav($loggedIn, $lastName, $alertCount, $view);
 $footer = createFooter();
+date_default_timezone_set('America/Denver');
 /************
 Default values
 **** END ****/

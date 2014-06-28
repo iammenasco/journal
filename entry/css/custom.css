@@ -312,3 +312,24 @@ button.close {
 .blah {
 	width: 15%;
 }
+.news {
+	text-align: center;
+	height: auto;
+	max-width: 900px;
+	margin-left: auto;
+	margin-right: auto;
+	text-align: left;
+}
+.commit {
+	margin-bottom: 5%;
+}
+.changes {
+	float: right;
+	margin-right: 2%;
+}
+.changeIcon {
+	font-size: 125%;
+	margin-right: 5%;
+	position: relative;
+	top: 3px;
+}
