@@ -128,7 +128,7 @@ function createNav($loggedIn, $lastName, $alertCount, $view) {
 		<div class="pure-menu pure-menu-open">
 			<a title="Home" class="pure-menu-heading" href="/journal/entry">I am <span class="name">' .  $lastName . '</span>.</a>
 			<ul id="std-menu-items">
-				<li class="menu-item-divided' . active($view, 'about') . '"><a title="About" href="?page=about"><span class="blah navIcon ion-ios7-information"></span>About</a></li>
+				<li class="menu-item-divided' . active($view, 'about') . '"><a title="About" href="?page=about"><span class="navIcon ion-ios7-information"></span>About</a></li>
 				<li class="' . active($view, 'features') . '"><a title="Features" href="?page=features"><span class="navIcon ion-lightbulb"></span>Features</a></li>
 				<li class="' . active($view, 'support') . '"><a title="Support" href="?page=support"><span class="navIcon ion-ios7-help"></span>Support</a></li>
 				<li class="' . active($view, 'news') . '"><a title="News" href="?page=news"><span class="navIcon ion-ios7-paper"></span>News</a></li>'
@@ -275,7 +275,7 @@ function createNews($footer) {
 		$list .= <<<HTML
 		<div class="pure-u-1 commit">
 			<h1 class="home-heading">{$title}</h1>
-			<h3><img align="middle" class="commit-avatar" title="{$authorName}" alt="{$authorName}&amp;#x27;s avatar" height="32" width="32" src="{$avatar}"> Changes by <span class="name">{$authorName}</span> at {$commitDate}</h3>
+			<h3><img class="commit-avatar" title="{$authorName}" alt="{$authorName}&amp;#x27;s avatar" height="32" width="32" src="{$avatar}"> Changes by <span class="name">{$authorName}</span> at {$commitDate}</h3>
 			<p><a class="pure-button outline-inverse changes" title="View changes for {$title}" href="{$url}"><span class="changeIcon ion-fork-repo"></span>View Changes</a>{$description}</p>
 		</div>
 HTML;

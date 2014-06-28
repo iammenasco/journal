@@ -290,8 +290,11 @@ button.close {
 }
 .navIcon {
 	font-size: 150%;
-	margin-right: 5%;
+	display: inline-block;
+	width: 20%;
 	position: relative;
+	margin-left: -5%;
+	margin-right: 3%;
 	top: 3px;
 	text-align: center;
 }
@@ -309,9 +312,6 @@ button.close {
 	position: relative;
 	top: 3px;
 }
-.blah {
-	width: 15%;
-}
 .news {
 	text-align: center;
 	height: auto;
@@ -325,11 +325,16 @@ button.close {
 }
 .changes {
 	float: right;
-	margin-right: 2%;
+	margin-right: 5%;
 }
 .changeIcon {
 	font-size: 125%;
 	margin-right: 5%;
 	position: relative;
 	top: 3px;
+}
+.commit-avatar {
+	position: relative;
+	top: 8px;
+	border-radius: 3px;
 }
