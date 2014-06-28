@@ -40,7 +40,10 @@ function logIn($email, $password) {
 	$con = con();
 	try {
 		$sql = 
-		'SELECT * FROM users WHERE userEmail = :userEmail and userPassword = :userPassword';
+		'SELECT * FROM users 
+		WHERE userEmail = :userEmail 
+		AND userPassword = :userPassword
+		AND userActive = TRUE;';
 		$stmt = $con->prepare($sql);
 		$stmt->bindParam(':userEmail', $email, PDO::PARAM_STR);
 		$stmt->bindParam(':userPassword', $password, PDO::PARAM_STR);
@@ -468,5 +471,156 @@ function getCMSNav() {
 }
 /************
 Get Created Page
+**** END ****/
+
+/**** START ****
+Update Password
+
+From the settings page, this function will update the current user's password.
+
+@param $newPass - New Password of the user
+@param $userID - Unique identifier of the user
+
+@return - If the entry is updated properly, function will return true. Other wise, it will return false.
+****************/
+function updatePassword($newPass, $userID) {
+	$con = con();
+	try {
+		$sql = 
+		'UPDATE users 
+		SET userPassword = :userPassword
+		WHERE userID = :userID';
+		$stmt = $con->prepare($sql);
+		$stmt->bindParam(':userPassword', $newPass, PDO::PARAM_STR);
+		$stmt->bindParam(':userID', $userID, PDO::PARAM_INT);
+		$stmt->execute();
+		$result = $stmt->rowCount();
+		$stmt->closeCursor();
+		return $result;
+	} catch (PDOException $e) {
+		return FALSE;
+	}
+	if ($result) {
+		return $result;
+	} else {
+		return FALSE;
+	}
+}
+/************
+Update Password
+**** END ****/
+
+/**** START ****
+Update User
+
+Update information on the user, including their name, email, and color settigns.
+
+@param $userID - Unique identifier of each user
+@param $entryID - ID of the specific entry the user is updating
+@param $title - Title of the entry
+@param $content - Content or body of the entry
+@param $url - URL value as part of the entry.
+@param $start - User indicated start time
+@param $end - User indicated end time
+@param $templateID - ID of the template used for the entry
+
+@return - If the entry is updated properly, function will return true. Other wise, it will return false.
+****************/
+function updateUser($firstName, $lastName, $email, $theme, $scheme, $userID) {
+	$con = con();
+	try {
+		$sql = 
+		'UPDATE users 
+		SET userFirstName = :userFirstName, userLastName = :userLastName, userEmail = :userEmail, userTheme = :userTheme, userColor = :userColor
+		WHERE userID = :userID';
+		$stmt = $con->prepare($sql);
+		$stmt->bindParam(':userFirstName', $firstName, PDO::PARAM_STR);
+		$stmt->bindParam(':userLastName', $lastName, PDO::PARAM_STR);
+		$stmt->bindParam(':userEmail', $email, PDO::PARAM_STR);
+		$stmt->bindParam(':userTheme', $theme, PDO::PARAM_STR);
+		$stmt->bindParam(':userColor', $scheme, PDO::PARAM_STR);
+		$stmt->bindParam(':userID', $userID, PDO::PARAM_INT);
+		$stmt->execute();
+		$result = $stmt->rowCount();
+		$stmt->closeCursor();
+		return $result;
+	} catch (PDOException $e) {
+		return FALSE;
+	}
+	if ($result) {
+		return $result;
+	} else {
+		return FALSE;
+	}
+}
+/************
+Update User
+**** END ****/
+
+/**** START ****
+Select User
+
+After changing user information, get user information to reset session variables.
+
+@param $userID - Unique identifier of the user
+
+@return - Will return user information to create session, or FALSE if no match is made.
+****************/
+function selectUser($userID) {
+	$con = con();
+	try {
+		$sql = 
+		'SELECT * FROM users WHERE userID = :userID';
+		$stmt = $con->prepare($sql);
+		$stmt->bindParam(':userID', $userID, PDO::PARAM_INT);
+		$stmt->execute();
+		$result = $stmt->fetch(PDO::FETCH_ASSOC);
+		$stmt->closeCursor();
+		if (!empty($result)) {
+			return $result;
+		} else {
+			return FALSE;
+		}
+	} catch (PDOException $e) {
+		return FALSE;
+	}
+}
+/************
+Select User
+**** END ****/
+
+/**** START ****
+Delete User
+
+This function does not actually delete the user, but flags them as inactive. This way, if there is a mistake, all is not lost forever. Just disabled.
+
+@param $userID - Unique identifier of each user
+
+@return - If the entry is updated properly, function will return true. Other wise, it will return false.
+****************/
+function deleteUser($userID) {
+	$con = con();
+	try {
+		$sql = 
+		'UPDATE users 
+		SET userActive = FALSE
+		WHERE userID = :userID';
+		$stmt = $con->prepare($sql);
+		$stmt->bindParam(':userID', $userID, PDO::PARAM_INT);
+		$stmt->execute();
+		$result = $stmt->rowCount();
+		$stmt->closeCursor();
+		return $result;
+	} catch (PDOException $e) {
+		return FALSE;
+	}
+	if ($result) {
+		return $result;
+	} else {
+		return FALSE;
+	}
+}
+/************
+Delete User
 **** END ****/
 ?>

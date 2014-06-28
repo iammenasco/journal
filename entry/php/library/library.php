@@ -43,9 +43,26 @@ This is a function to run the data received through a post and sanitize inputs.
 
 @return - Return the sanitized data.
 ****************/
-function testInput($data) {
-	$data = stripslashes($data);
-	$data = htmlspecialchars($data);
+function testInput($data, $type) {
+	switch ($type) {
+		case 'string':
+			$data = filter_var(trim($data), FILTER_SANITIZE_STRING);
+			break;
+		case 'email':
+			$data = filter_var(filter_var(trim($data), FILTER_SANITIZE_EMAIL), FILTER_VALIDATE_EMAIL);
+			break;
+		case 'int':
+			$data = filter_var(filter_var(trim($data), FILTER_SANITIZE_NUMBER_INT), FILTER_VALIDATE_INT);
+			break;
+		case 'float':
+			$data = filter_var(trim($data), FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+			$data = filter_var($data, FILTER_VALIDATE_FLOAT, FILTER_FLAG_ALLOW_THOUSAND);
+			break;
+		default:
+			$data = stripslashes($data);
+			$data = htmlspecialchars($data);
+			break;
+	}
 	return $data;
 }
 /************
@@ -134,17 +151,6 @@ function createNav($loggedIn, $lastName, $alertCount, $view) {
 				<li class="' . active($view, 'news') . '"><a title="News" href="?page=news"><span class="navIcon ion-ios7-paper"></span>News</a></li>'
 				. $cmsNav . $userItems .
 				'<li>
-				<select class="menu-select" onChange="loadCSS(this.value);">
-					<option selected="selected" disabled="disabled">Theme</option>
-					<option value="blue">Blue</option>
-					<option value="lime">Green</option>
-					<option value="orange">Orange</option>
-					<option value="pink">Pink</option>
-					<option value="purple">Purple</option>
-					<option value="red">Red</option>
-					<option value="white">White</option>
-					<option value="yellow">Yellow</option>
-				</select>
 			</li>
 		</ul>
 	</div>
@@ -638,6 +644,51 @@ Delete Entry
 **** END ****/
 
 /**** START ****
+Delete User
+
+Warning view if the user wants to delete the current user. userID is sent through the back end, as well as the POST to validate they are deleting their account only.
+
+@param $userID - ID of the currently logged in user.
+@param $footer - HTML of the Footer to be added at the bottom of each Entry.
+
+@return - HTML of the delete page used for the view.
+****************/
+function createDeleteUser($userID, $footer) {
+	if(isset($_GET['user'])) {
+		$urlUserID = $_GET['user'];
+		$user = selectUser($userID);
+		$firstName = $user['userFirstName'];
+		$lastName = $user['userLastName'];
+	}
+	return <<<HTML
+	<div class="main">
+		<div class="header">
+			<h1>I am <span class="name">Menasco</span>.</h1>
+			<h2>A magical place of hope and wonder</h2>
+		</div>
+		<div class="pure-g">
+			<div class="pure-u-1 delete">
+				<div class="deleteIcon ion-nuclear"></div>
+				<h1 class="home-heading">Are you sure you want to delete<br><span class="name">{$firstName} {$lastName}</span>'s account?</h1>
+				<p class="lead">This can not be undone. Please dont cry if everything blows up.</p>
+				<form class="pure-form pure-form-stacked" action="." method="post">
+					<input type="hidden" name="urlUserID" value="{$urlUserID}">
+					<button title="Delete User" type="submit" name="action" value="deleteUser" class="pure-button outline-inverse">Yes</button>
+					<a title="Cancel Deletion" href="?page=settings" class="pure-button outline-inverse">No</a>
+				</form>
+			</div>
+			<div class="pure-u-1">
+				{$footer}
+			</div>
+		</div>
+	</div>
+HTML;
+}
+/************
+Delete Entry
+**** END ****/
+
+/**** START ****
 Home Page
 
 Displays the default view of the home page, with text and buttons to direct the user to use the site. Or display important information.
@@ -790,6 +841,23 @@ Displays list settings the user can change and edit for their account.
 @return - HTML of the home page.
 ****************/
 function createSettings($footer) {
+	$firstName = $_SESSION['firstName'];
+	$lastName = $_SESSION['lastName'];
+	$email = $_SESSION['email'];
+	$userID = $_SESSION['userID'];
+	$fullName = $firstName . ' ' . $lastName;
+	$currentScheme = $_SESSION['color'];
+	$currentTheme = $_SESSION['theme'];
+	if ($currentTheme == Null or $currentTheme == '') {
+		$dark = 'checked';
+		$light = '';
+	} else if ($currentTheme == 'dark') {
+		$dark = 'checked';
+		$light = '';
+	} else if ($currentTheme == 'light') {
+		$dark = '';
+		$light = 'checked';
+	}
 	return <<<HTML
 	<div class="main">
 		<div class="header">
@@ -797,11 +865,60 @@ function createSettings($footer) {
 			<h2>A magical place of hope and wonder</h2>
 		</div>
 		<div class="pure-g">
-			<div class="pure-u-1 construction">
-				<h1 class="home-heading">Under <span class="name">Construction</span>.</h1>
-				<p class="lead">Patience you must have, my young padawan. Things are changing up a bit. Frequent updates are on the way, check some of them out at the <span class="name">&beta;</span>eta page.</p>
-				<p class="lead"><a class="pure-button outline-inverse" href="/?page=signIn">See the future.</a></p>
+			<div class="pure-u-1">
+				<h1 class="settingsHeading">Change {$fullName}'s <span class="name">Settings</span>.</h1>
 			</div>
+			<form class="pure-form pure-form-aligned settings" action="." method="post">
+				<fieldset>
+					<h3 class="settingsHeading">Personal <span class="name">Information</span>.</h3>
+					<div class="pure-control-group">
+						<label for="firstName">First Name</label>
+						<input id="firstName" placeholder="{$firstName}" value="{$firstName}" name="firstName">
+					</div>
+					<div class="pure-control-group">
+						<label for="lastName">Last Name</label>
+						<input id="lastName"  placeholder="{$lastName}" value="{$lastName}" name="lastName">
+					</div>
+					<div class="pure-control-group">
+						<label for="email">Email Address</label>
+						<input id="email" type="email" placeholder="{$email}" value="{$email}" name="email">
+					</div>
+				</fieldset>
+				<fieldset>
+					<h3 class="settingsHeading">Change <span class="name">Password</span>.</h3>
+					<div class="pure-control-group">
+						<label for="newPassword">New Password</label>
+						<input id="newPassword" type="password" placeholder="New Password" name="newPassword">
+					</div>
+				</fieldset>
+				<fieldset>
+					<h3 class="settingsHeading">Change <span class="name">Theme</span>.</h3>
+					<div class="pure-control-group">
+							<input type="radio" name="theme" value="dark" {$dark}> Dark Theme<br>
+							<input type="radio" name="theme" value="light" {$light}> Light Theme
+					</div>
+					<div class="pure-control-group">
+						<label for="scheme">Color Scheme</label>
+						<select id="scheme" title="Select a Color theme" name="scheme">
+							<option value="blue">Blue</option>
+							<option value="lime">Green</option>
+							<option value="orange">Orange</option>
+							<option value="pink">Pink</option>
+							<option value="purple">Purple</option>
+							<option value="red">Red</option>
+							<option value="white">White</option>
+							<option value="yellow">Yellow</option>
+						</select>
+					</div>
+				</fieldset>
+				<div class="pure-controls">
+					<button title="Save Settings" type="submit" name="action" value="settings" class="pure-button outline-inverse"><span class="entryIcon ion-ios7-locked"></span>Save</button>
+				</div>
+				<div class="pure-controls">
+				<h3 class="settingsHeading">Danger <span class="name">Zone</span>.</h3>
+				<a title="Delete this entry" href="?page=deleteUser&amp;user={$userID}" class="pure-button outline-inverse"><span class="entryIcon ion-ios7-minus"></span>Delete Account</a>
+				</div>
+			</form>
 			<div class="pure-u-1">
 				{$footer}
 			</div>

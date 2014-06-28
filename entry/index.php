@@ -123,12 +123,12 @@ if (isset($_SESSION['loggedIn']) && isset($_SESSION['loggedIn']) == TRUE) {
 	$userID = '';
 }
 if ($color != '') {
-	$colorCSS = '<link rel="stylesheet" type="text/css" href="css/theme/' . $color . '.css" id="theme">';
+	$colorCSS = '<link rel="stylesheet" type="text/css" href="css/theme/' . $color . '.css">';
 } else {
 	$colorCSS = '';
 }
 if ($theme != '') {
-	$themeCSS = '<link rel="stylesheet" type="text/css" href="css/theme/' . $theme . '.css" id="theme">';
+	$themeCSS = '<link rel="stylesheet" type="text/css" href="css/theme/' . $theme . '.css">';
 } else {
 	$themeCSS = '';
 }
@@ -156,11 +156,11 @@ Each statement sets the post values to variables, which are validated and saniti
 ****************/
 if (isset($_POST['action'])) {
 	if ($_POST['action'] == 'register') {
-		$firstName = ucfirst(strtolower(testInput($_POST['firstName'])));
-		$lastName = ucfirst(strtolower(testInput($_POST['lastName'])));
-		$email = testInput($_POST['email']);
-		$password = testInput($_POST['password']);
-		$password2 = testInput($_POST['password2']);
+		$firstName = ucfirst(strtolower(testInput($_POST['firstName'], 'string')));
+		$lastName = ucfirst(strtolower(testInput($_POST['lastName'], 'string')));
+		$email = testInput($_POST['email'], 'email');
+		$password = testInput($_POST['password'], 'password');
+		$password2 = testInput($_POST['password2'], 'password');
 		$title = 'Welcome to I am Menasco!';
 		$content = 'This is your first post! You can edit it, change the template, or delete it. Feel free to do whatever you want with it, and continue to add more! You can (and should) create many entries and use this as an online journal. Have fun and let me know how it all works out for you!';
 
@@ -198,12 +198,12 @@ if (isset($_POST['action'])) {
 			header('Location: /journal/entry/?page=signUp');
 		} 
 	} else if ($_POST['action'] == 'newEntry') {
-		$title = testInput($_POST['title']);
-		$content = testInput($_POST['content']);
-		$url = testInput($_POST['url']);
-		$start = testInput($_POST['start']);
-		$end = testInput($_POST['end']);
-		$templateID = testInput($_POST['templateID']);
+		$title = testInput($_POST['title'], 'string');
+		$content = testInput($_POST['content'], 'string');
+		$url = testInput($_POST['url'], 'string');
+		$start = testInput($_POST['start'], 'string');
+		$end = testInput($_POST['end'], 'string');
+		$templateID = testInput($_POST['templateID'], 'int');
 		// Validate the data
 		if (!empty($title) &&
 			!empty($content) &&
@@ -230,13 +230,13 @@ if (isset($_POST['action'])) {
 			header('Location: /journal/entry/?page=new');
 		}
 	} else if ($_POST['action'] == 'updateEntry') {
-		$title = testInput($_POST['title']);
-		$content = testInput($_POST['content']);
-		$url = testInput($_POST['url']);
-		$start = testInput($_POST['start']);
-		$end = testInput($_POST['end']);
-		$entryID = testInput($_POST['entryID']);
-		$templateID = testInput($_POST['templateID']);
+		$title = testInput($_POST['title'], 'string');
+		$content = testInput($_POST['content'], 'string');
+		$url = testInput($_POST['url'], 'string');
+		$start = testInput($_POST['start'], 'string');
+		$end = testInput($_POST['end'], 'string');
+		$entryID = testInput($_POST['entryID'], 'int');
+		$templateID = testInput($_POST['templateID'], 'int');
 		// Validate the data
 		if (!empty($title) &&
 			!empty($content) &&
@@ -265,9 +265,9 @@ if (isset($_POST['action'])) {
 			header('Location: /journal/entry/?page=entries');
 		}
 	} else if ($_POST['action'] == 'delete') {
-		$title = ucfirst(strtolower(testInput($_POST['title'])));
-		$content = testInput($_POST['content']);
-		$entryID = testInput($_POST['entryID']);
+		$title = ucfirst(strtolower(testInput($_POST['title'], 'string')));
+		$content = testInput($_POST['content'], 'string');
+		$entryID = testInput($_POST['entryID'], 'int');
 		// Validate the data
 		if (!empty($title) &&
 			!empty($content) &&
@@ -293,9 +293,33 @@ if (isset($_POST['action'])) {
 			$_SESSION['alert'] = array('title' => 'Entry not Deleted', 'message' => 'The entry was not deleted, please try again!', 'status' => 'warning', 'show' => true);
 			header('Location: /journal/entry/?page=entries');
 		}
+	} else if ($_POST['action'] == 'deleteUser') {
+		$urlUserID = testInput($_POST['urlUserID'], 'int');
+		// Validate the data
+		if (!empty($urlUserID)
+			&& $urlUserID == $userID) {
+			$valid = true;
+		} else {
+			$valid = false;
+		}
+		// Write data to database
+		if ($valid) {
+			$result = deleteUser($userID);
+		} else {
+			$_SESSION['alert'] = array('title' => 'User not Deleted', 'message' => 'The user was not deleted, please try again... or not', 'status' => 'warning', 'show' => true);
+			header('Location: /journal/entry/?page=settings');
+		}
+		// Check Results
+		if ($result) {
+			$_SESSION['alert'] = array('title' => 'User Deleted', 'message' => 'Please come back again!', 'status' => 'success', 'show' => true);
+			header('Location: /journal/entry/?page=logOut');
+		} else {
+			$_SESSION['alert'] = array('title' => 'User not Deleted', 'message' => 'The user was not deleted.', 'status' => 'warning', 'show' => true);
+			header('Location: /journal/entry/?page=settings');
+		}
 	} else if ($_POST['action'] == 'signIn') {
-		$email = testInput($_POST['email']);
-		$password = testInput($_POST['password']);
+		$email = testInput($_POST['email'], 'email');
+		$password = testInput($_POST['password'], 'password');
 		// Validate the data
 		if (!empty($email) &&
 			!empty($password)) {
@@ -322,6 +346,26 @@ if (isset($_POST['action'])) {
 			$_SESSION['alert'] = array('title' => 'Try Again.', 'message' => 'The email or password you entered is incorrect. Please try again!', 'status' => 'warning', 'show' => true);
 			header('Location: /journal/entry/?page=signIn');
 		}
+	} else if ($_POST['action'] == 'settings') {
+		$firstName = ucfirst(strtolower(testInput($_POST['firstName'], 'string')));
+		$lastName = ucfirst(strtolower(testInput($_POST['lastName'], 'string')));
+		$email = testInput($_POST['email'], 'email');
+		$newPass = testInput($_POST['newPassword'], 'password');
+		$theme = strtolower(testInput($_POST['theme'], 'string'));
+		$scheme = strtolower(testInput($_POST['scheme'], 'string'));
+		if (!empty($newPass)) {
+			$result = updatePassword(md5($newPass), $userID);
+		}
+		$result = updateUser($firstName, $lastName, $email, $theme, $scheme, $userID);
+		if ($result) {
+			$_SESSION['alert'] = array('title' => 'User updated!', 'message' => "$firstName's account has now been updated.", 'status' => 'success', 'show' => true);
+			$result = selectUser($userID);
+			createSession($result);
+			header('Location: /journal/entry/?page=settings');
+		} else {
+			$_SESSION['alert'] = array('title' => 'Changes not saved', 'message' => 'Something went wrong, and the changes were not saved. Please try again!', 'status' => 'danger', 'show' => true);
+			header('Location: /journal/entry/?page=settings');
+		}
 	}
 }
 /************
@@ -339,6 +383,7 @@ Contains the following view possibilities:
 	entries
 	new
 	delete
+	deleteUser
 	logOut
 	about
 	features
@@ -402,6 +447,16 @@ if(isset($_GET['page'])) {
 			unset($_SESSION['alert']);
 			$body = createDelete($userID, $footer);
 			$viewText = '| Entries | Delete';
+		} else {
+			$_SESSION['alert'] = array('title' => 'Please Login.', 'message' => 'To view the previous page, you must be logged in.', 'status' => 'danger', 'show' => true);
+			header('Location: /journal/entry/?page=signIn');
+		}
+	} else if ($_GET['page'] == 'deleteUser') {
+		if ($loggedIn) {
+			$alert = createAlert();
+			unset($_SESSION['alert']);
+			$body = createDeleteUser($userID, $footer);
+			$viewText = '| Settings | Delete User';
 		} else {
 			$_SESSION['alert'] = array('title' => 'Please Login.', 'message' => 'To view the previous page, you must be logged in.', 'status' => 'danger', 'show' => true);
 			header('Location: /journal/entry/?page=signIn');

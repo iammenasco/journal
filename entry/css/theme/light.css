@@ -20,3 +20,17 @@ ul>.active {
 li>a {
 	color:#202020;
 }
+.pure-form input:not([type]),
+.pure-form input[type=password],
+.pure-form input[type=email],
+.pure-form-stacked textarea,
+.pure-form-stacked textarea {
+	color: #202020;
+	background-color: transparent;
+	border-color: #368DDA;
+	border: 1px solid #368DDA;
+	box-shadow: inset 0 0 0 #368DDA;
+}
+a {
+	color: #999;
+}
