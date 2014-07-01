@@ -344,39 +344,41 @@ Used to create the list of entries from that user. entryTitle is trimmed if ther
 function entryList($userID, $entries, $avatar) {
 	$list = '';
 	$i = 0;
-	foreach ($entries as $entry) {
-		if (strlen($entry['entryTitle']) > 27) {
-			$title = substr($entry['entryTitle'], 0, 27) . '...';
-		} else {
-			$title = $entry['entryTitle'];
-		}
-		if (strlen($entry['entryContent']) > 75) {
-			$snip = substr($entry['entryContent'], 0, 75) . '...';
-		} else {
-			$snip = $entry['entryContent'];
-		}
-		$id = 'entry' . $entry['entryID'];
-		if ($i == 0) {
-			$active = ' active';
-		} else {
-			$active = '';
-		}
-		$name = entryName($entry['entryCreatedBy']);
-		$list .= <<<HTML
-		<li class="{$active}"><a title="{$title}" href="#{$id}" data-toggle="tab">
-			<div class="entry-item pure-g">
-				<div class="pure-u">
-					{$avatar}
+	if ($entries) {
+		foreach ($entries as $entry) {
+			if (strlen($entry['entryTitle']) > 27) {
+				$title = substr($entry['entryTitle'], 0, 27) . '...';
+			} else {
+				$title = $entry['entryTitle'];
+			}
+			if (strlen($entry['entryContent']) > 75) {
+				$snip = substr($entry['entryContent'], 0, 75) . '...';
+			} else {
+				$snip = $entry['entryContent'];
+			}
+			$id = 'entry' . $entry['entryID'];
+			if ($i == 0) {
+				$active = ' active';
+			} else {
+				$active = '';
+			}
+			$name = entryName($entry['entryCreatedBy']);
+			$list .= <<<HTML
+			<li class="{$active}"><a title="{$title}" href="#{$id}" data-toggle="tab">
+				<div class="entry-item pure-g">
+					<div class="pure-u">
+						{$avatar}
+					</div>
+					<div class="pure-u-3-4">
+						<h5 class="entry-name">{$name['userFirstName']} {$name['userLastName']}</h5>
+						<h4 class="entry-subject">{$title}</h4>
+						<p class="entry-desc">{$snip}</p>
+					</div>
 				</div>
-				<div class="pure-u-3-4">
-					<h5 class="entry-name">{$name['userFirstName']} {$name['userLastName']}</h5>
-					<h4 class="entry-subject">{$title}</h4>
-					<p class="entry-desc">{$snip}</p>
-				</div>
-			</div>
-		</a></li>
+			</a></li>
 HTML;
-		$i++;
+			$i++;
+		}
 	}
 	$list .= <<<HTML
 	<li>
@@ -405,36 +407,44 @@ Creates the HTML of each entry. All entries are hidden unless they contain the '
 function entryContent($userID, $entries, $footer) {
 	$list = '';
 	$i = 0;
-	foreach ($entries as $entry) {
-		$subject = $entry['entryTitle'];
-		$time = date("g:ia, F jS, Y",strtotime($entry['entryTime']));
-		$content = $entry['entryContent'];
-		$id = 'entry' . $entry['entryID'];
-		if ($i == 0) {
-			$active = ' active';
-		} else {
-			$active = '';
-		}
-		$name = entryName($entry['entryCreatedBy']);
-		$list .= <<<HTML
-		<div class="entry-content tab-pane {$active}" id="{$id}">
-			<div class="entry-content-header pure-g">
-				<div class="pure-u-1-2">
-					<h1 class="entry-content-title">{$subject}</h1>
-					<p class="entry-content-subtitle">From <a>{$name['userFirstName']} {$name['userLastName']}</a> at <span>{$time}</span>
-					</p>
+	if ($entries) {
+		foreach ($entries as $entry) {
+			$subject = $entry['entryTitle'];
+			$time = date("g:ia, F jS, Y",strtotime($entry['entryTime']));
+			$content = $entry['entryContent'];
+			$id = 'entry' . $entry['entryID'];
+			if ($i == 0) {
+				$active = ' active';
+			} else {
+				$active = '';
+			}
+			$name = entryName($entry['entryCreatedBy']);
+			$list .= <<<HTML
+			<div class="entry-content tab-pane {$active}" id="{$id}">
+				<div class="entry-content-header pure-g">
+					<div class="pure-u-1-2">
+						<h1 class="entry-content-title">{$subject}</h1>
+						<p class="entry-content-subtitle">From <a>{$name['userFirstName']} {$name['userLastName']}</a> at <span>{$time}</span>
+						</p>
+					</div>
+					<div class="entry-content-controls pure-u-1-2">
+						<a title="Create a New entry" href="?page=new" class="pure-button outline-inverse"><span class="entryIcon ion-plus"></span>New</a>
+						<a title="Edit current entry" href="?page=new&amp;entry={$entry['entryID']}" class="pure-button outline-inverse"><span class="entryIcon ion-edit"></span>Edit</a>
+						<a title="Delete this entry" href="?page=delete&amp;entry={$entry['entryID']}" class="pure-button outline-inverse"><span class="entryIcon ion-trash-a"></span>Delete</a>
+					</div>
 				</div>
-				<div class="entry-content-controls pure-u-1-2">
-					<a title="Create a New entry" href="?page=new" class="pure-button outline-inverse"><span class="entryIcon ion-plus"></span>New</a>
-					<a title="Edit current entry" href="?page=new&amp;entry={$entry['entryID']}" class="pure-button outline-inverse"><span class="entryIcon ion-edit"></span>Edit</a>
-					<a title="Delete this entry" href="?page=delete&amp;entry={$entry['entryID']}" class="pure-button outline-inverse"><span class="entryIcon ion-trash-a"></span>Delete</a>
-				</div>
+				<div class="entry-content-body">{$content}</div>
+				{$footer}
 			</div>
-			<div class="entry-content-body">{$content}</div>
-			{$footer}
-		</div>
 HTML;
-		$i++;
+			$i++;
+		}
+	} else {
+		$list = <<<HTML
+			<div class="entry-content tab-pane active">
+				{$footer}
+			</div>
+HTML;
 	}
 	return $list;
 }
