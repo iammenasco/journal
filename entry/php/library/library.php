@@ -46,6 +46,8 @@ This is a function to run the data received through a post and sanitize inputs.
 function testInput($data, $type) {
 	switch ($type) {
 		case 'string':
+			$data = stripslashes($data);
+			$data = htmlspecialchars($data);
 			$data = filter_var(trim($data), FILTER_SANITIZE_STRING);
 			break;
 		case 'email':

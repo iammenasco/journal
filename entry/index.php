@@ -63,6 +63,12 @@ if (is_readable('php/model/model.php')) {
 	header('location: /errordocs/500.php');
 }
 
+if (is_readable('php/library/PasswordHash.php')) {
+	require 'php/library/PasswordHash.php';
+} else {
+	header('location: /errordocs/500.php');
+}
+
 if (is_readable('php/library/library.php')) {
 	require 'php/library/library.php';
 } else {
@@ -180,7 +186,7 @@ if (isset($_POST['action'])) {
 
 		// Write data to database
 		if ($valid) {
-			$result = registerUser($firstName, $lastName, $email, md5($password));
+			$result = registerUser($firstName, $lastName, $email, create_hash($password));
 		} else {
 			$_SESSION['alert'] = array('title' => 'Opps!', 'message' => 'There was an error creating your account. Please enter information in all the fields.', 'status' => 'danger', 'show' => true);
 			header('Location: /journal/entry/?page=signUp');
@@ -188,7 +194,7 @@ if (isset($_POST['action'])) {
 		}
 		// Check Results
 		if ($result) {
-			$result = logIn($email, md5($password));
+			$result = logIn($email);
 			createSession($result);
 			newEntry($result['userID'], $title, $content, NULL, NULL, NULL, 1);
 			$_SESSION['alert'] = array('title' => "Welcome, $firstName!", 'message' => 'Your account has been created, and you are now logged in. Have fun!', 'status' => 'success', 'show' => true);
@@ -331,14 +337,19 @@ if (isset($_POST['action'])) {
 
 		// Write data to database
 		if ($valid) {
-			$result = logIn($email, md5($password));
+			$result = logIn($email);
+			if (validate_password($password, $result['userPassword'])) {
+				$passTest = TRUE;
+			} else {
+				$passTest = FALSE;
+			}
 		} else {
 			$_SESSION['alert'] = array('title' => 'Opps!', 'message' => 'There was an error logging into your account. Please enter information in all the fields.', 'status' => 'danger', 'show' => true);
 			header('Location: /journal/entry/?page=signIn');
 			exit;
 		}
 		// Check Results
-		if ($result) {
+		if ($result && $passTest) {
 			createSession($result);
 			$_SESSION['alert'] = array('title' => 'Welcome!', 'message' => 'You have successfully logged in', 'status' => 'success', 'show' => true);
 			header('Location: /journal/entry/?page=entries');
@@ -354,10 +365,10 @@ if (isset($_POST['action'])) {
 		$theme = strtolower(testInput($_POST['theme'], 'string'));
 		$scheme = strtolower(testInput($_POST['scheme'], 'string'));
 		if (!empty($newPass)) {
-			$result = updatePassword(md5($newPass), $userID);
+			$passChange = updatePassword(create_hash($newPass), $userID);
 		}
 		$result = updateUser($firstName, $lastName, $email, $theme, $scheme, $userID);
-		if ($result) {
+		if ($result or $passChange) {
 			$_SESSION['alert'] = array('title' => 'User updated!', 'message' => "$firstName's account has now been updated.", 'status' => 'success', 'show' => true);
 			$result = selectUser($userID);
 			createSession($result);
@@ -421,7 +432,7 @@ if(isset($_GET['page'])) {
 			$body .= '</ul><div class="pure-1 entry tab-content">';
 			$body .= entryContent($userID, $entries, $footer);
 			$body .= '</div></div>';
-			$viewText = '| Entries';
+			$viewText = "| $lastName's Entries";
 		} else {
 			$_SESSION['alert'] = array('title' => 'Please Login.', 'message' => 'To view the previous page, you must be logged in.', 'status' => 'danger', 'show' => true);
 			header('Location: /journal/entry/?page=signIn');

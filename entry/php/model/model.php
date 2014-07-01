@@ -36,17 +36,15 @@ Check to see if the given credentials match a row stored in the users table.
 
 @return - Will return user information to create session, or FALSE if no match is made.
 ****************/
-function logIn($email, $password) {
+function logIn($email) {
 	$con = con();
 	try {
 		$sql = 
 		'SELECT * FROM users 
 		WHERE userEmail = :userEmail 
-		AND userPassword = :userPassword
 		AND userActive = TRUE;';
 		$stmt = $con->prepare($sql);
 		$stmt->bindParam(':userEmail', $email, PDO::PARAM_STR);
-		$stmt->bindParam(':userPassword', $password, PDO::PARAM_STR);
 		$stmt->execute();
 		$result = $stmt->fetch(PDO::FETCH_ASSOC);
 		$stmt->closeCursor();
