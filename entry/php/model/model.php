@@ -420,9 +420,9 @@ function getCreatedPage($page) {
 	try {
 		$query = 
 		'SELECT * FROM pages
-		WHERE pageTitle = :pageTitle';
+		WHERE pageURL = :pageURL';
 		$stmt = $con->prepare($query);
-		$stmt->bindParam(':pageTitle', $page, PDO::PARAM_STR);
+		$stmt->bindParam(':pageURL', $page, PDO::PARAM_STR);
 		$stmt->execute();
 		$result = $stmt->fetch(PDO::FETCH_ASSOC);
 		$stmt->closeCursor();
@@ -513,14 +513,12 @@ Update User
 
 Update information on the user, including their name, email, and color settigns.
 
+@param $firstName - First Name of the user
+@param $lastName - Last Name of the user
+@param $email - Email of the user
+@param $theme - Dark or light CSS
+@param $scheme - Changes the colors on the page
 @param $userID - Unique identifier of each user
-@param $entryID - ID of the specific entry the user is updating
-@param $title - Title of the entry
-@param $content - Content or body of the entry
-@param $url - URL value as part of the entry.
-@param $start - User indicated start time
-@param $end - User indicated end time
-@param $templateID - ID of the template used for the entry
 
 @return - If the entry is updated properly, function will return true. Other wise, it will return false.
 ****************/
@@ -553,6 +551,51 @@ function updateUser($firstName, $lastName, $email, $theme, $scheme, $userID) {
 }
 /************
 Update User
+**** END ****/
+
+/**** START ****
+Update User Admin
+
+Update information on the user from the Admin, including their name, email, and color settigns.
+
+@param $firstName - First Name of the user
+@param $lastName - Last Name of the user
+@param $email - Email of the user
+@param $admin - Boolean value if the user is an Administrator
+@param $active - Boolean value if the user is active
+@param $userID - Unique identifier of each user
+
+@return - If the entry is updated properly, function will return true. Other wise, it will return false.
+****************/
+function updateUserAdmin($firstName, $lastName, $email, $admin, $active, $userID) {
+	$con = con();
+	try {
+		$sql = 
+		'UPDATE users 
+		SET userFirstName = :userFirstName, userLastName = :userLastName, userEmail = :userEmail, userAdmin = :userAdmin, userActive = :userActive
+		WHERE userID = :userID';
+		$stmt = $con->prepare($sql);
+		$stmt->bindParam(':userFirstName', $firstName, PDO::PARAM_STR);
+		$stmt->bindParam(':userLastName', $lastName, PDO::PARAM_STR);
+		$stmt->bindParam(':userEmail', $email, PDO::PARAM_STR);
+		$stmt->bindParam(':userAdmin', $admin, PDO::PARAM_INT);
+		$stmt->bindParam(':userActive', $active, PDO::PARAM_INT);
+		$stmt->bindParam(':userID', $userID, PDO::PARAM_INT);
+		$stmt->execute();
+		$result = $stmt->rowCount();
+		$stmt->closeCursor();
+		return $result;
+	} catch (PDOException $e) {
+		return FALSE;
+	}
+	if ($result) {
+		return $result;
+	} else {
+		return FALSE;
+	}
+}
+/************
+Update User Admin
 **** END ****/
 
 /**** START ****
@@ -620,5 +663,165 @@ function deleteUser($userID) {
 }
 /************
 Delete User
+**** END ****/
+
+/**** START ****
+Select Names
+
+Select all users
+
+@return - Return array of all the users.
+****************/
+function selectNames() {
+	$con = con();
+	try {
+		$sql = 
+		'SELECT * FROM users';
+		$stmt = $con->prepare($sql);
+		$stmt->execute();
+		$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		$stmt->closeCursor();
+		if (!empty($result)) {
+			return $result;
+		} else {
+			return FALSE;
+		}
+	} catch (PDOException $e) {
+		return FALSE;
+	}
+}
+/************
+Select Names
+**** END ****/
+
+/**** START ****
+Select Pages
+
+Select all CMS Pages
+
+@return - Return array of all the users.
+****************/
+function selectPages() {
+	$con = con();
+	try {
+		$sql = 
+		'SELECT * FROM pages';
+		$stmt = $con->prepare($sql);
+		$stmt->execute();
+		$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		$stmt->closeCursor();
+		if (!empty($result)) {
+			return $result;
+		} else {
+			return FALSE;
+		}
+	} catch (PDOException $e) {
+		return FALSE;
+	}
+}
+/************
+Select Pages
+**** END ****/
+
+/**** START ****
+Update Page
+
+Will change the current values of a page with the content sent from the user
+
+@param $pageIdent - pageID of the current page
+@param $pageTitle - Title of the current Page
+@param $pageDesc - Description of the current page
+@param $pageContent - Body/Content of the page
+@param $pageClass - Ionicon class of the navigation icon
+@param $pageURL - Navigation URL used for the page
+@param $pageNav - Title of the page on the Navigation
+@param $pageLink - Link where the button takes the user
+@param $PageButton - Text on the button of the page
+@param $pageActive - Boolean value if the user is active
+
+@return - If the page is updated properly, function will return true. Other wise, it will return false.
+****************/
+function updatePage($pageIdent, $pageTitle, $pageDesc, $pageContent, $pageClass, $pageURL, $pageNav, $pageLink, $pageButton, $pageActive) {
+	$con = con();
+	try {
+		$sql = 
+		'UPDATE pages 
+		SET pageTitle = :pageTitle, pageDesc = :pageDesc, pageContent = :pageContent, pageClass = :pageClass, pageURL = :pageURL, pageNav = :pageNav, pageLink = :pageLink, pageButton = :pageButton, pageActive = :pageActive
+		WHERE pageID = :pageID';
+		$stmt = $con->prepare($sql);
+		$stmt->bindParam(':pageTitle', $pageTitle, PDO::PARAM_STR);
+		$stmt->bindParam(':pageDesc', $pageDesc, PDO::PARAM_STR);
+		$stmt->bindParam(':pageContent', $pageContent, PDO::PARAM_STR);
+		$stmt->bindParam(':pageClass', $pageClass, PDO::PARAM_STR);
+		$stmt->bindParam(':pageURL', $pageURL, PDO::PARAM_STR);
+		$stmt->bindParam(':pageNav', $pageNav, PDO::PARAM_STR);
+		$stmt->bindParam(':pageLink', $pageLink, PDO::PARAM_STR);
+		$stmt->bindParam(':pageButton', $pageButton, PDO::PARAM_STR);
+		$stmt->bindParam(':pageActive', $pageActive, PDO::PARAM_INT);
+		$stmt->bindParam(':pageID', $pageIdent, PDO::PARAM_INT);
+		$stmt->execute();
+		$result = $stmt->rowCount();
+		$stmt->closeCursor();
+		return $result;
+	} catch (PDOException $e) {
+		return FALSE;
+	}
+	if ($result) {
+		return $result;
+	} else {
+		return FALSE;
+	}
+}
+/************
+Update Page
+**** END ****/
+
+/**** START ****
+New Page
+
+Create a new page from the Admin view
+
+@param $pageTitle - Title of the new Page
+@param $pageDesc - Description of the new page
+@param $pageContent - Body/Content of the page
+@param $pageClass - Ionicon class of the navigation icon
+@param $pageURL - Navigation URL used for the page
+@param $pageNav - Title of the page on the Navigation
+@param $pageLink - Link where the button takes the user
+@param $PageButton - Text on the button of the page
+@param $pageActive - Boolean value if the user is active
+
+@return - If the page is inserted properly, function will return true. Other wise, it will return false.
+****************/
+function newPage($pageTitle, $pageDesc, $pageContent, $pageClass, $pageURL, $pageNav, $pageLink, $pageButton, $pageActive) {
+	$con = con();
+	try {
+		$sql = 
+		'INSERT INTO pages (pageTitle, pageDesc, pageContent, pageClass, pageURL, pageNav, pageLink, pageButton, pageActive)
+		VALUES (:pageTitle, :pageDesc, :pageContent, :pageClass, :pageURL, :pageNav, :pageLink, :pageButton, :pageActive);';
+		$stmt = $con->prepare($sql);
+		$stmt->bindParam(':pageTitle', $pageTitle, PDO::PARAM_STR);
+		$stmt->bindParam(':pageDesc', $pageDesc, PDO::PARAM_STR);
+		$stmt->bindParam(':pageContent', $pageContent, PDO::PARAM_STR);
+		$stmt->bindParam(':pageClass', $pageClass, PDO::PARAM_STR);
+		$stmt->bindParam(':pageURL', $pageURL, PDO::PARAM_STR);
+		$stmt->bindParam(':pageNav', $pageNav, PDO::PARAM_STR);
+		$stmt->bindParam(':pageLink', $pageLink, PDO::PARAM_STR);
+		$stmt->bindParam(':pageButton', $pageButton, PDO::PARAM_STR);
+		$stmt->bindParam(':pageActive', $pageActive, PDO::PARAM_INT);
+		$stmt->execute();
+		$result = $con->lastInsertId();
+		$stmt->closeCursor();
+	} catch (PDOException $e) {
+		return FALSE;
+	}
+	if ($result >= 1) {
+		return TRUE;
+	} else {
+		return FALSE;
+	}
+}
+/************
+New Page
 **** END ****/
 ?>

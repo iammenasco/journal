@@ -37,3 +37,9 @@ a {
 .header h2 {
 	color: #999;
 }
+.pure-table td input {
+	color: #202020;
+}
+.pure-table thead{
+	color: #202020;
+}

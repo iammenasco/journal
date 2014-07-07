@@ -45,6 +45,7 @@
 .pure-form input:not([type]):focus,
 .pure-form input[type=password]:focus,
 .pure-form-stacked textarea:focus,
+.pure-form input[type=search]:focus,
 .pure-form input[type=email]:focus {
 	border-color: white;
 	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px white;
@@ -53,9 +54,33 @@
 .pure-form input:not([type]),
 .pure-form input[type=password],
 .pure-form-stacked textarea,
+.pure-form input[type=search],
 .pure-form input[type=email] {
 	border-color: white;
 }
 .icon:hover {
 	text-shadow: 0 0 15px white;
+}
+.pure-table-horizontal td {
+	border-bottom: 1px solid white;
+}
+.pure-table {
+	border: 1px solid white;
+}
+.pure-table-horizontal td,
+.pure-table-horizontal th {
+	border-bottom: 1px solid white;
+}
+.pure-table tbody{
+	border-top: 1px solid white;
+}
+.pure-table td input {
+	border-color: white;
+	border: 1px solid white;
+	box-shadow: inset 0 0 0 white;
+}
+.pure-table td input:focus{
+	border-color: white;
+	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px white;
+	box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px white;
 }

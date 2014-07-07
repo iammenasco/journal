@@ -28,6 +28,7 @@ function createSession($userArray) {
 	$_SESSION['email'] = $userArray['userEmail'];
 	$_SESSION['color'] = $userArray['userColor'];
 	$_SESSION['theme'] = $userArray['userTheme'];
+	$_SESSION['admin'] = $userArray['userAdmin'];
 	return TRUE;
 }
 /************
@@ -124,15 +125,17 @@ Also contains the active function, used to see if the current view matches that 
 
 @return - If it matches, it returns the class used to highlight that item in the nav.
 ****************/
-function createNav($loggedIn, $lastName, $alertCount, $view) {
+function createNav($loggedIn, $lastName, $alertCount, $view, $admin) {
 	$cmsNav = checkNav($view);
 	if ($loggedIn) {
 		$userItems = '
 		<li class="pure-menu-heading">Journals</li>
 		<li class="' . active($view, 'entries') . '"><a title="Entries" href="?page=entries"><span class="navIcon ion-document-text"></span>Entries</a></li>
 		<li class="' . active($view, 'logOut') . '"><a title="Log Out" href="?page=logOut"><span class="navIcon ion-log-out"></span>Log out</a></li>
-		<li class="' . active($view, 'settings') . '"><a title="User Settings" href="?page=settings"><span class="navIcon ion-ios7-gear"></span>Settings</a></li>
-		<li class="' . active($view, 'admin') . '"><a title="Site Administration" href="?page=admin"><span class="navIcon ion-settings"></span>Admin</a></li>';
+		<li class="' . active($view, 'settings') . '"><a title="User Settings" href="?page=settings"><span class="navIcon ion-ios7-gear"></span>Settings</a></li>';
+		if ($admin) {
+			$userItems .= '<li class="' . active($view, 'admin') . '"><a title="Site Administration" href="?page=admin"><span class="navIcon ion-settings"></span>Admin</a></li>';
+		}
 	} else {
 		$userItems = '
 		<li class="pure-menu-heading"></li>
@@ -533,7 +536,7 @@ function createNewEntry($userID, $templates, $footer) {
 	$name = entryName($userID);
 	foreach ($templates as $template) {
 		if ($template['templateEntryTitle'] == 1) {
-			$title = '<label for="title">Title</label><textarea id="title" rows="1" placeholder="Title" name="title">' . $entryTitle .'</textarea>';
+			$title = '<label for="title">Title</label><textarea required="required" type="text" id="title" rows="1" placeholder="Title" name="title">' . $entryTitle .'</textarea>';
 		} else {
 			$title = '<input type="hidden" name="title" value="' . $entryTitle .'">';
 		}
@@ -545,7 +548,7 @@ function createNewEntry($userID, $templates, $footer) {
 		}
 
 		if ($template['templateContent'] == 1) {
-			$content = '<label for="entry">Entry</label><textarea id="entry" rows="15" cols="50" placeholder="Entry" name="content">' . $entryContent . '</textarea>';
+			$content = '<label for="entry">Entry</label><textarea required="required"  id="entry" rows="15" cols="50" placeholder="Entry" name="content">' . $entryContent . '</textarea>';
 		} else {
 			$content = '<input type="hidden" name="content" value="' . $entryContent . '">';
 		}
@@ -953,16 +956,100 @@ Displays administrative pages for the site, including user privileges.
 ****************/
 function createAdmin($footer) {
 	return <<<HTML
-	<div class="main">
+	<div class="admin">
+		<script>
+			function showUser(str) {
+				if (str.length==0) { 
+					document.getElementById("userList").innerHTML="";
+					return;
+				}
+				var xmlhttp=new XMLHttpRequest();
+				xmlhttp.onreadystatechange=function() {
+					if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+						document.getElementById("userList").innerHTML=xmlhttp.responseText;
+					}
+				}
+				xmlhttp.open("GET","php/library/getUsers.php?q="+str,true);
+				xmlhttp.send();
+			}
+		</script>
+		<script>
+			function showAllUsers(str) {
+				var xmlhttp=new XMLHttpRequest();
+				xmlhttp.onreadystatechange=function() {
+					if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+						document.getElementById("userList").innerHTML=xmlhttp.responseText;
+					}
+				}
+				xmlhttp.open("GET","php/library/getUsers.php?a="+str,true);
+				xmlhttp.send();
+			}
+		</script>
+		<script>
+			function showPage(str) {
+				if (str.length==0) { 
+					document.getElementById("userList").innerHTML="";
+					return;
+				}
+				var xmlhttp=new XMLHttpRequest();
+				xmlhttp.onreadystatechange=function() {
+					if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+						document.getElementById("pageList").innerHTML=xmlhttp.responseText;
+					}
+				}
+				xmlhttp.open("GET","php/library/getPages.php?q="+str,true);
+				xmlhttp.send();
+			}
+		</script>
+		<script>
+			function showAllPages(str) {
+				var xmlhttp=new XMLHttpRequest();
+				xmlhttp.onreadystatechange=function() {
+					if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+						document.getElementById("pageList").innerHTML=xmlhttp.responseText;
+					}
+				}
+				xmlhttp.open("GET","php/library/getPages.php?a="+str,true);
+				xmlhttp.send();
+			}
+		</script>
 		<div class="header">
 			<h1>I am <span class="name">Menasco</span>.</h1>
 			<h2>A magical place of hope and wonder</h2>
 		</div>
 		<div class="pure-g">
-			<div class="pure-u-1 construction">
-				<h1 class="home-heading">Under <span class="name">Construction</span>.</h1>
-				<p class="lead">Patience you must have, my young padawan. Things are changing up a bit. Frequent updates are on the way, check some of them out at the <span class="name">&beta;</span>eta page.</p>
-				<p class="lead"><a class="pure-button outline-inverse" href="/?page=signIn">See the future.</a></p>
+			<div class="pure-u-1">
+				<h1 class="settingsHeading">Edit Site <span class="name">Settings</span>.</h1>
+			</div>
+			<div class="pure-form pure-form-aligned settings">
+				<fieldset>
+					<h3 class="settingsHeading">Manage <span class="name">Users</span>.</h3>
+					<div class="pure-control-group">
+						<label for="search">Search Users</label>
+						<input id="search" onkeyup="showUser(this.value)" type="search" name="search">
+					</div>
+				</fieldset>
+				<div class="pure-controls">
+					<button title="Show all users" class="pure-button outline-inverse" onclick="showAllUsers(this.value)" value="true"><span class="entryIcon ion-ios7-people"></span>Show all Users</button>
+				</div>
+			</div>
+			<div class="pure-u-1">
+				<div class="userList" id="userList"></div>
+			</div>
+			<div class="pure-form pure-form-aligned settings">
+				<fieldset>
+					<h3 class="settingsHeading">Edit/Create <span class="name">Pages</span>.</h3>
+					<div class="pure-control-group">
+						<label for="search">Search Pages</label>
+						<input id="search" onkeyup="showPage(this.value)" type="search" name="search">
+					</div>
+				</fieldset>
+				<div class="pure-controls">
+					<button title="Show all users" class="pure-button outline-inverse" onclick="showAllPages(this.value)" value="true"><span class="entryIcon ion-ios7-copy"></span>Show all Pages</button>
+				</div>
+			</div>
+			<div class="pure-u-1">
+				<div class="pageList" id="pageList"></div>
 			</div>
 			<div class="pure-u-1">
 				{$footer}
@@ -1040,25 +1127,25 @@ function createSignUp($footer) {
 			<fieldset>
 				<div class="pure-control-group">
 					<label for="firstName">First Name</label>
-					<input id="firstName" placeholder="First Name" name="firstName">
+					<input required="required" type="text" id="firstName" placeholder="First Name" name="firstName">
 				</div>
 				<div class="pure-control-group">
 					<label for="lastName">Last Name</label>
-					<input id="lastName"  placeholder="Last Name" name="lastName">
+					<input required="required" type="text" id="lastName"  placeholder="Last Name" name="lastName">
 				</div>
 			</fieldset>
 			<fieldset>
 				<div class="pure-control-group">
 					<label for="email">Email Address</label>
-					<input id="email" type="email" placeholder="Email Address" name="email">
+					<input required="required" id="email" type="email" placeholder="Email Address" name="email">
 				</div>
 				<div class="pure-control-group">
 					<label for="password">Password</label>
-					<input id="password" type="password" placeholder="Password" name="password">
+					<input required="required" id="password" type="password" placeholder="Password" name="password">
 				</div>
 				<div class="pure-control-group">
 					<label for="password2">Confirm Password</label>
-					<input id="password2" type="password" placeholder="Password" name="password2">
+					<input required="required" id="password2" type="password" placeholder="Password" name="password2">
 				</div>
 			</fieldset>
 			<div class="pure-controls">
