@@ -60,19 +60,19 @@ Include the model and library.
 if (is_readable('php/model/model.php')) {
 	require 'php/model/model.php';
 } else {
-	header('location: /errordocs/500.php');
+	header('location: /500.shtml');
 }
 
 if (is_readable('php/library/PasswordHash.php')) {
 	require 'php/library/PasswordHash.php';
 } else {
-	header('location: /errordocs/500.php');
+	header('location: /500.shtml');
 }
 
 if (is_readable('php/library/library.php')) {
 	require 'php/library/library.php';
 } else {
-	header('location: /errordocs/500.php');
+	header('location: /500.shtml');
 }
 /************
 Includes
@@ -195,7 +195,7 @@ if (isset($_POST['action'])) {
 			$result = registerUser($firstName, $lastName, $email, create_hash($password));
 		} else {
 			$_SESSION['alert'] = array('title' => 'Opps!', 'message' => 'There was an error creating your account. Please enter information in all the fields.', 'status' => 'danger', 'show' => true);
-			header('Location: /journal/entry/?page=signUp');
+			header('Location: /?page=signUp');
 			exit;
 		}
 		// Check Results
@@ -204,10 +204,10 @@ if (isset($_POST['action'])) {
 			createSession($result);
 			newEntry($result['userID'], $title, $content, NULL, NULL, NULL, 1);
 			$_SESSION['alert'] = array('title' => "Welcome, $firstName!", 'message' => 'Your account has been created, and you are now logged in. Have fun!', 'status' => 'success', 'show' => true);
-			header('Location: /journal/entry/?page=entries');
+			header('Location: /?page=entries');
 		} else if ($result == false) {
 			$_SESSION['alert'] = array('title' => 'Opps!', 'message' => 'There was an issue creating your account, please try again.', 'status' => 'danger', 'show' => true);
-			header('Location: /journal/entry/?page=signUp');
+			header('Location: /?page=signUp');
 		} 
 	} else if ($_POST['action'] == 'newEntry') {
 		$title = testInput($_POST['title'], 'string');
@@ -230,16 +230,16 @@ if (isset($_POST['action'])) {
 			$result = newEntry($userID, $title, $content, $url, $start, $end, $templateID);
 		} else {
 			$_SESSION['alert'] = array('title' => 'Error', 'message' => 'Could not create new entry. Please try again.', 'status' => 'danger', 'show' => true);
-			header('Location: /journal/entry/?page=new');
+			header('Location: /?page=new');
 			exit;
 		}
 		// Check Results
 		if ($result) {
 			$_SESSION['alert'] = array('title' => 'Entry Saved', 'message' => 'The new entry is now available for your enjoyment', 'status' => 'success', 'show' => true);
-			header('Location: /journal/entry/?page=entries');
+			header('Location: /?page=entries');
 		} else {
 			$_SESSION['alert'] = array('title' => 'Error', 'message' => 'Could not create new entry. Please try again.', 'status' => 'danger', 'show' => true);
-			header('Location: /journal/entry/?page=new');
+			header('Location: /?page=new');
 		}
 	} else if ($_POST['action'] == 'updateEntry') {
 		$title = testInput($_POST['title'], 'string');
@@ -265,16 +265,16 @@ if (isset($_POST['action'])) {
 			$result = updateEntry($userID, $entryID, $title, $content, $url, $start, $end, $templateID);
 		} else {
 			$_SESSION['alert'] = array('title' => 'Changes not saved', 'message' => 'Something went wrong, and the changes were not saved. Please try again!', 'status' => 'danger', 'show' => true);
-			header('Location: /journal/entry/?page=entries');
+			header('Location: /?page=entries');
 			exit;
 		}
 		// Check Results
 		if ($result) {
 			$_SESSION['alert'] = array('title' => 'Entry updated!', 'message' => "$title has now been changed.", 'status' => 'success', 'show' => true);
-			header('Location: /journal/entry/?page=entries');
+			header('Location: /?page=entries');
 		} else {
 			$_SESSION['alert'] = array('title' => 'Changes not saved', 'message' => 'Something went wrong, and the changes were not saved. Please try again!', 'status' => 'danger', 'show' => true);
-			header('Location: /journal/entry/?page=entries');
+			header('Location: /?page=entries');
 		}
 	} else if ($_POST['action'] == 'delete') {
 		$title = ucfirst(strtolower(testInput($_POST['title'], 'string')));
@@ -295,15 +295,15 @@ if (isset($_POST['action'])) {
 			$result = deleteEntry($userID, $entryID, $title, $content);
 		} else {
 			$_SESSION['alert'] = array('title' => 'Entry not Deleted', 'message' => 'The entry was not deleted, please try again!', 'status' => 'warning', 'show' => true);
-			header('Location: /journal/entry/?page=entries');
+			header('Location: /?page=entries');
 		}
 		// Check Results
 		if ($result) {
 			$_SESSION['alert'] = array('title' => 'Entry Deleted', 'message' => 'There is no going back now!', 'status' => 'success', 'show' => true);
-			header('Location: /journal/entry/?page=entries');
+			header('Location: /?page=entries');
 		} else {
 			$_SESSION['alert'] = array('title' => 'Entry not Deleted', 'message' => 'The entry was not deleted, please try again!', 'status' => 'warning', 'show' => true);
-			header('Location: /journal/entry/?page=entries');
+			header('Location: /?page=entries');
 		}
 	} else if ($_POST['action'] == 'deleteUser') {
 		$urlUserID = testInput($_POST['urlUserID'], 'int');
@@ -319,15 +319,15 @@ if (isset($_POST['action'])) {
 			$result = deleteUser($userID);
 		} else {
 			$_SESSION['alert'] = array('title' => 'User not Deleted', 'message' => 'The user was not deleted, please try again... or not', 'status' => 'warning', 'show' => true);
-			header('Location: /journal/entry/?page=settings');
+			header('Location: /?page=settings');
 		}
 		// Check Results
 		if ($result) {
 			$_SESSION['alert'] = array('title' => 'User Deleted', 'message' => 'Please come back again!', 'status' => 'success', 'show' => true);
-			header('Location: /journal/entry/?page=logOut');
+			header('Location: /?page=logOut');
 		} else {
 			$_SESSION['alert'] = array('title' => 'User not Deleted', 'message' => 'The user was not deleted.', 'status' => 'warning', 'show' => true);
-			header('Location: /journal/entry/?page=settings');
+			header('Location: /?page=settings');
 		}
 	} else if ($_POST['action'] == 'signIn') {
 		$email = testInput($_POST['email'], 'email');
@@ -351,17 +351,17 @@ if (isset($_POST['action'])) {
 			}
 		} else {
 			$_SESSION['alert'] = array('title' => 'Opps!', 'message' => 'There was an error logging into your account. Please enter information in all the fields.', 'status' => 'danger', 'show' => true);
-			header('Location: /journal/entry/?page=signIn');
+			header('Location: /?page=signIn');
 			exit;
 		}
 		// Check Results
 		if ($result && $passTest) {
 			createSession($result);
 			$_SESSION['alert'] = array('title' => 'Welcome!', 'message' => 'You have successfully logged in', 'status' => 'success', 'show' => true);
-			header('Location: /journal/entry/?page=entries');
+			header('Location: /?page=entries');
 		} else {
 			$_SESSION['alert'] = array('title' => 'Try Again.', 'message' => 'The email or password you entered is incorrect. Please try again!', 'status' => 'warning', 'show' => true);
-			header('Location: /journal/entry/?page=signIn');
+			header('Location: /?page=signIn');
 		}
 	} else if ($_POST['action'] == 'settings') {
 		$firstName = ucfirst(strtolower(testInput($_POST['firstName'], 'string')));
@@ -378,10 +378,10 @@ if (isset($_POST['action'])) {
 			$_SESSION['alert'] = array('title' => 'User updated!', 'message' => "$firstName's account has now been updated.", 'status' => 'success', 'show' => true);
 			$result = selectUser($userID);
 			createSession($result);
-			header('Location: /journal/entry/?page=settings');
+			header('Location: /?page=settings');
 		} else {
 			$_SESSION['alert'] = array('title' => 'Changes not saved', 'message' => 'Something went wrong, and the changes were not saved. Please try again!', 'status' => 'danger', 'show' => true);
-			header('Location: /journal/entry/?page=settings');
+			header('Location: /?page=settings');
 		}
 	} else if ($_POST['action'] == 'userAdmin') {
 		$userFirstName = ucfirst(strtolower(testInput($_POST['firstName'], 'string')));
@@ -404,15 +404,15 @@ if (isset($_POST['action'])) {
 			$result = updateUserAdmin($userFirstName, $userLastName, $userEmail, $userAdmin, $userActive, $userIdent);
 		} else {
 			$_SESSION['alert'] = array('title' => 'User not Updated', 'message' => 'The user was not updated, please make sure all fields were filled out.', 'status' => 'warning', 'show' => true);
-			header('Location: /journal/entry/?page=admin');
+			header('Location: /?page=admin');
 			exit;
 		}
 		if ($result) {
 			$_SESSION['alert'] = array('title' => 'User updated!', 'message' => "$userFirstName $userLastName's account has now been updated.", 'status' => 'success', 'show' => true);
-			header('Location: /journal/entry/?page=admin');
+			header('Location: /?page=admin');
 		} else {
 			$_SESSION['alert'] = array('title' => 'Changes not saved', 'message' => 'Something went wrong, and the changes were not saved. Please try again!', 'status' => 'danger', 'show' => true);
-			header('Location: /journal/entry/?page=admin');
+			header('Location: /?page=admin');
 		}
 	} else if ($_POST['action'] == 'pageAdmin') {
 		$pageIdent = testInput($_POST['pageID'], 'int');
@@ -434,9 +434,10 @@ if (isset($_POST['action'])) {
 			$pageURL == 'admin' ||
 			$pageURL == 'settings' ||
 			$pageURL == 'news' ||
+			$pageURL == 'plan' ||
 			$pageURL == 'support') {
 			$_SESSION['alert'] = array('title' => 'Title Reserved', 'message' => 'The page title you chose is used for something else. Please choose a different one!', 'status' => 'danger', 'show' => true);
-			header('Location: /journal/entry/?page=admin');
+			header('Location: /?page=admin');
 			exit;
 		}
 		if (isset($_POST['link'])) {
@@ -461,15 +462,15 @@ if (isset($_POST['action'])) {
 				$result = updatePage($pageIdent, $pageTitle, $pageDesc, $pageContent, $pageClass, $pageURL, $pageNav, $pageLink, $pageButton, $pageActive);
 		} else {
 			$_SESSION['alert'] = array('title' => 'Page not Updated', 'message' => 'The page was not updated, please make sure all required fields were filled out.', 'status' => 'warning', 'show' => true);
-			header('Location: /journal/entry/?page=admin');
+			header('Location: /?page=admin');
 			exit;
 		}
 		if ($result) {
 			$_SESSION['alert'] = array('title' => 'Page updated!', 'message' => "$pageTitle has now been updated.", 'status' => 'success', 'show' => true);
-			header('Location: /journal/entry/?page=admin');
+			header('Location: /?page=admin');
 		} else {
 			$_SESSION['alert'] = array('title' => 'Changes not saved', 'message' => 'Something went wrong, and the changes were not saved. Please try again!', 'status' => 'danger', 'show' => true);
-			header('Location: /journal/entry/?page=admin');
+			header('Location: /?page=admin');
 		}
 	} else if ($_POST['action'] == 'newPage') {
 		$pageTitle = ucfirst(strtolower(testInput($_POST['title'], 'string')));
@@ -490,9 +491,10 @@ if (isset($_POST['action'])) {
 			$pageURL == 'admin' ||
 			$pageURL == 'settings' ||
 			$pageURL == 'news' ||
+			$pageURL == 'plan' ||
 			$pageURL == 'support') {
 			$_SESSION['alert'] = array('title' => 'Title Reserved', 'message' => 'The page title you chose is used for something else. Please choose a different one!', 'status' => 'danger', 'show' => true);
-			header('Location: /journal/entry/?page=admin');
+			header('Location: /?page=admin');
 			exit;
 		}
 		if (isset($_POST['link'])) {
@@ -517,15 +519,15 @@ if (isset($_POST['action'])) {
 				$result = newPage($pageTitle, $pageDesc, $pageContent, $pageClass, $pageURL, $pageNav, $pageLink, $pageButton, $pageActive);
 		} else {
 			$_SESSION['alert'] = array('title' => 'Page not Created', 'message' => 'The page was not created, please make sure all required fields were filled out.', 'status' => 'warning', 'show' => true);
-			header('Location: /journal/entry/?page=admin');
+			header('Location: /?page=admin');
 			exit;
 		}
 		if ($result) {
 			$_SESSION['alert'] = array('title' => 'Page created!', 'message' => "$pageTitle has now been created.", 'status' => 'success', 'show' => true);
-			header('Location: /journal/entry/?page=admin');
+			header('Location: /?page=admin');
 		} else {
 			$_SESSION['alert'] = array('title' => 'Changes not saved', 'message' => 'Something went wrong, and the changes were not saved. Please try again!', 'status' => 'danger', 'show' => true);
-			header('Location: /journal/entry/?page=admin');
+			header('Location: /?page=admin');
 		}
 	}
 }
@@ -585,7 +587,7 @@ if(isset($_GET['page'])) {
 			$viewText = "| $lastName's Entries";
 		} else {
 			$_SESSION['alert'] = array('title' => 'Please Login.', 'message' => 'To view the previous page, you must be logged in.', 'status' => 'danger', 'show' => true);
-			header('Location: /journal/entry/?page=signIn');
+			header('Location: /?page=signIn');
 		}
 	} else if ($_GET['page'] == 'new') {
 		if ($loggedIn) {
@@ -600,7 +602,7 @@ if(isset($_GET['page'])) {
 			$viewText = '| Entries | Editor';
 		} else {
 			$_SESSION['alert'] = array('title' => 'Please Login.', 'message' => 'To view the previous page, you must be logged in.', 'status' => 'danger', 'show' => true);
-			header('Location: /journal/entry/?page=signIn');
+			header('Location: /?page=signIn');
 		}
 	} else if ($_GET['page'] == 'delete') {
 		if ($loggedIn) {
@@ -610,7 +612,7 @@ if(isset($_GET['page'])) {
 			$viewText = '| Entries | Delete';
 		} else {
 			$_SESSION['alert'] = array('title' => 'Please Login.', 'message' => 'To view the previous page, you must be logged in.', 'status' => 'danger', 'show' => true);
-			header('Location: /journal/entry/?page=signIn');
+			header('Location: /?page=signIn');
 		}
 	} else if ($_GET['page'] == 'deleteUser') {
 		if ($loggedIn) {
@@ -620,7 +622,7 @@ if(isset($_GET['page'])) {
 			$viewText = '| Settings | Delete User';
 		} else {
 			$_SESSION['alert'] = array('title' => 'Please Login.', 'message' => 'To view the previous page, you must be logged in.', 'status' => 'danger', 'show' => true);
-			header('Location: /journal/entry/?page=signIn');
+			header('Location: /?page=signIn');
 		}
 	} else if ($_GET['page'] == 'logOut') {
 		$_SESSION['loggedIn'] = FALSE;
@@ -631,7 +633,7 @@ if(isset($_GET['page'])) {
 		unset($_SESSION['color']);
 		unset($_SESSION['theme']);
 		session_destroy();
-		header('Location: /journal/entry');
+		header('Location: /');
 	} else if ($_GET['page'] == 'about') {
 		$alert = createAlert();
 		unset($_SESSION['alert']);
@@ -655,7 +657,7 @@ if(isset($_GET['page'])) {
 			$viewText = "| $lastName's Settings";
 		} else {
 			$_SESSION['alert'] = array('title' => 'Please Login.', 'message' => 'To view the previous page, you must be logged in.', 'status' => 'danger', 'show' => true);
-			header('Location: /journal/entry/?page=signIn');
+			header('Location: /?page=signIn');
 		}
 	} else if ($_GET['page'] == 'admin') {
 		if ($loggedIn && $admin) {
@@ -665,11 +667,16 @@ if(isset($_GET['page'])) {
 			$viewText = '| Admin';
 		} else {
 			$_SESSION['alert'] = array('title' => 'Please Login.', 'message' => 'To view the previous page, you must be logged in.', 'status' => 'danger', 'show' => true);
-			header('Location: /journal/entry/?page=signIn');
+			header('Location: /?page=signIn');
 		}
 	} else if ($_GET['page'] == 'news') {
 		$body = createNews($footer);
 		$viewText = '| News';
+		$alert = createAlert();
+		unset($_SESSION['alert']);
+	} else if ($_GET['page'] == 'plan') {
+		$body = createSitePlan($footer);
+		$viewText = '| Site Plan';
 		$alert = createAlert();
 		unset($_SESSION['alert']);
 	} else if (validPage($_GET['page'])) {
@@ -678,7 +685,7 @@ if(isset($_GET['page'])) {
 		$viewText = '| '. $page['pageTitle'];
 		$alert = createAlert();
 	} else if (!validPage($_GET['page'])) {
-		header('Location: 404.shtml');
+		header('Location: /404.shtml');
 	}
 }
 else {

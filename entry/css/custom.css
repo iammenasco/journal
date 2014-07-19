@@ -29,6 +29,11 @@ body {
 	font-size: 18px;
 	border-radius: 6px;
 }
+.edit {
+	float: right;
+	margin: 1%;
+	padding: 3px 5px 5px 5px;
+}
 .outline-inverse {
 	color: #fff;
 	background-color: transparent;
@@ -321,7 +326,6 @@ button.close {
 }
 .changes {
 	float: right;
-	margin-right: 5%;
 }
 .changeIcon {
 	font-size: 125%;
@@ -354,7 +358,7 @@ button.close {
 	margin-bottom: 10%;
 }
 .userTable {
-	max-width: 1050;
+	max-width: 1050px;
 }
 .pure-table-horizontal td {
 	border-bottom: 1px solid #368DDA;

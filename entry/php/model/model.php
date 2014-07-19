@@ -19,7 +19,7 @@ Create the connection to the database
 try {
 	require $_SERVER['DOCUMENT_ROOT'] . '/connections/iammenasco.php';
 } catch (Exception $e) {
-	header('location: /errordocs/500.php');
+	header('location: /500.shtml');
 	exit;
 }
 /************

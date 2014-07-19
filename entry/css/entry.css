@@ -246,7 +246,7 @@ ul>.active {
         right: 0;
         bottom: 0;
         overflow: auto;
-        width: 100%
+        width: calc(100% - 150px);
     }
 
 }
@@ -272,6 +272,7 @@ ul>.active {
         margin: 0;
         padding: 0;
         padding-left: 350px;
+        width: 100% - 350px;
     }
 }
 

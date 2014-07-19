@@ -22,6 +22,7 @@ li>a {
 }
 .pure-form input:not([type]),
 .pure-form input[type=password],
+.pure-form input[type=search],
 .pure-form input[type=email],
 .pure-form-stacked textarea,
 .pure-form-stacked textarea {

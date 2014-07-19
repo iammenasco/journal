@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+	<meta content="IE=edge" http-equiv="X-UA-Compatible" />
+	<meta content="width=device-width, initial-scale=1" name="viewport" />
+	<link href="favicon.ico" rel="shortcut icon" />
+	<title>I am Menasco.</title>
+	<!-- Bootstrap core CSS -->
+	<link href="/css/bootstrap.css" rel="stylesheet" />
+	<link href="/css/error.css" rel="stylesheet" />
+</head>
+<body>
+	<div class="try"></div>
+
+	<div class="site-wrapper">
+		<div class="site-wrapper-inner">
+			<div class="cover-container">
+				<div class="masthead clearfix">
+					<div class="inner">
+						<h3 class="masthead-brand">I am <span class="name">Menasco</span>.</h3>
+
+						<ul class="nav masthead-nav">
+							<li class="active"><a href="http://iammenasco.com">Home</a></li>
+							<li><a href="http://portfolio.iammenasco.com">Portfolio</a></li>
+							<li><a href="http://resume.iammenasco.com">Resume</a></li>
+						</ul>
+					</div>
+				</div>
+
+				<div class="inner cover">
+				<h1 class="cover-heading">500 Error! Internal <span class="name">server</span> error.</h1>
+
+					<p class="lead">Alright, this is probably my bad. You might want to try back later, since I might be messing with things.</p>
+
+					<p class="lead"><a class="btn btn-lg btn-outline-inverse" href="http://iammenasco.com">Homeward bound!</a></p>
+				</div>
+
+				<div class="mastfoot">
+					<div class="inner">
+						<p>See more on my <a href="http://portfolio.iammenasco.com">Portfolio</a>, by <a href="https://twitter.com/iammenasco">@iammenasco</a>.</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+	</html>

@@ -148,7 +148,7 @@ function createNav($loggedIn, $lastName, $alertCount, $view, $admin) {
 	</a>
 	<div id="menu">
 		<div class="pure-menu pure-menu-open">
-			<a title="Home" class="pure-menu-heading" href="/journal/entry">I am <span class="name">' .  $lastName . '</span>.</a>
+			<a title="Home" class="pure-menu-heading" href="/">I am <span class="name">' .  $lastName . '</span>.</a>
 			<ul id="std-menu-items">
 				<li class="menu-item-divided' . active($view, 'about') . '"><a title="About" href="?page=about"><span class="navIcon ion-ios7-information"></span>About</a></li>
 				<li class="' . active($view, 'features') . '"><a title="Features" href="?page=features"><span class="navIcon ion-lightbulb"></span>Features</a></li>
@@ -254,14 +254,15 @@ Utilizes the GitHub API. For each commit, create a short version of what changed
 function createNews($footer) {
 	$list = '';
 	$url = 'https://api.github.com/repos/iammenasco/journal/commits';
-	$curl_handle=curl_init();
-	curl_setopt($curl_handle, CURLOPT_URL, $url);
-	curl_setopt($curl_handle, CURLOPT_CONNECTTIMEOUT, 2);
-	curl_setopt($curl_handle, CURLOPT_RETURNTRANSFER, 1);
-	curl_setopt($curl_handle, CURLOPT_USERAGENT, 'I am Menasco');
-	$query = curl_exec($curl_handle);
-	curl_close($curl_handle);
-	$json = json_decode($query,true);
+	// $curl_handle=curl_init();
+	// curl_setopt($curl_handle, CURLOPT_URL, $url);
+	// curl_setopt($curl_handle, CURLOPT_CONNECTTIMEOUT, 2);
+	// curl_setopt($curl_handle, CURLOPT_RETURNTRANSFER, 1);
+	// curl_setopt($curl_handle, CURLOPT_USERAGENT, 'I am Menasco');
+	// $query = curl_exec($curl_handle);
+	// curl_close($curl_handle);
+	$result = file_get_contents($url);
+	$json = json_decode($result,true);
 	foreach ($json as $commit) {
 		$authorName = $commit['commit']['author']['name'];
 		$authorEmail = $commit['commit']['author']['email'];
@@ -431,9 +432,9 @@ function entryContent($userID, $entries, $footer) {
 						</p>
 					</div>
 					<div class="entry-content-controls pure-u-1-2">
-						<a title="Create a New entry" href="?page=new" class="pure-button outline-inverse"><span class="entryIcon ion-plus"></span>New</a>
-						<a title="Edit current entry" href="?page=new&amp;entry={$entry['entryID']}" class="pure-button outline-inverse"><span class="entryIcon ion-edit"></span>Edit</a>
-						<a title="Delete this entry" href="?page=delete&amp;entry={$entry['entryID']}" class="pure-button outline-inverse"><span class="entryIcon ion-trash-a"></span>Delete</a>
+						<a title="Create a New entry" href="?page=new" class="pure-button edit outline-inverse"><span class="entryIcon ion-plus"></span>New</a>
+						<a title="Edit current entry" href="?page=new&amp;entry={$entry['entryID']}" class="pure-button edit outline-inverse"><span class="entryIcon ion-edit"></span>Edit</a>
+						<a title="Delete this entry" href="?page=delete&amp;entry={$entry['entryID']}" class="pure-button edit outline-inverse"><span class="entryIcon ion-trash-a"></span>Delete</a>
 					</div>
 				</div>
 				<div class="entry-content-body">{$content}</div>
@@ -797,10 +798,14 @@ function createFeatures($footer) {
 			<h2>A magical place of hope and wonder</h2>
 		</div>
 		<div class="pure-g">
-			<div class="pure-u-1 construction">
-				<h1 class="home-heading">Under <span class="name">Construction</span>.</h1>
-				<p class="lead">Patience you must have, my young padawan. Things are changing up a bit. Frequent updates are on the way, check some of them out at the <span class="name">&beta;</span>eta page.</p>
-				<p class="lead"><a class="pure-button outline-inverse" href="/?page=signIn">See the future.</a></p>
+			<div class="pure-u-1">
+				<h1 class="home-heading">Features.</h1>
+				<p class="lead name">Create a journal.</p>
+				<p>You have come to the right place if you want to keep an online journal. Just sign up, and start making history!</p>
+				<p class="lead name">Edit/Delete an entry.</p>
+				<p>Made a mistake? Have memories you want redacted? Do it.</p>
+				<p class="lead name">Colors.</p>
+				<p>Don’t like the standard <span class=“name”>I am Menasco</span>. blue? Change it in your settings.</p>
 			</div>
 			<div class="pure-u-1">
 				{$footer}
@@ -830,10 +835,12 @@ function createSupport($footer) {
 			<h2>A magical place of hope and wonder</h2>
 		</div>
 		<div class="pure-g">
-			<div class="pure-u-1 construction">
-				<h1 class="home-heading">Under <span class="name">Construction</span>.</h1>
-				<p class="lead">Patience you must have, my young padawan. Things are changing up a bit. Frequent updates are on the way, check some of them out at the <span class="name">&beta;</span>eta page.</p>
-				<p class="lead"><a class="pure-button outline-inverse" href="/?page=signIn">See the future.</a></p>
+			<div class="pure-u-1">
+				<h1 class="home-heading">Support.</h1>
+				<p class="lead">If you find something <span class="name">broken</span>, <a href="mailto:menasco+site@me.com?Subject=Site%20busted" target="_top">email me</a> and I will fix it.</p>
+				<p class="lead">If you need help with <span class="name">I am Menasco</span>, <a href="mailto:menasco+site@me.com?Subject=Site%20help" target="_top">email me</a> and I can help you.</p>
+				<p class="lead">If you want a good <span class="name">joke</span>, <a href="mailto:menasco+site@me.com?Subject=Humor%20me" target="_top">email me</a> and I can try.</p>
+				<p class="lead">Anything else, ask your <span class="name">mother</span>.</p>
 			</div>
 			<div class="pure-u-1">
 				{$footer}
@@ -844,6 +851,63 @@ HTML;
 }
 /************
 Support Page
+**** END ****/
+
+/**** START ****
+Site Plan Page
+
+List a bunch of useless requirements that the site has.
+
+@param $footer - HTML of the Footer to be added at the bottom of each Entry.
+
+@return - HTML of the home page.
+****************/
+function createSitePlan($footer) {
+	return <<<HTML
+	<div class="main">
+		<div class="header">
+			<h1>I am <span class="name">Menasco</span>.</h1>
+			<h2>A magical place of hope and wonder</h2>
+		</div>
+		<div class="pure-g">
+			<div class="pure-u-1">
+				<h1 class="home-heading">Site <span class="name">Plan</span>.</h1>
+				<p class="lead"><span class="name">Purpose</span>.</p>
+				<p>I am Menasco is an online journaling website for people to create entries for themselves and store them online to be accessible anywhere at anytime.</p>
+				<p class="lead"><span class="name">Audience</span>.</p>
+				<p>Anyone with computer skills, and a desire to journal it up!</p>
+				<p class="lead">Use <span class="name">Case</span>.</p>
+				<p>Male - <span class="name">Dave</span>. 25 years old. Student in sports medicine. <span class="name">Dave</span> reads many books and needs a place to keep a study journal. He hates paper, and wants a place to store everything online so he can use it from his tablet, phone, and computer. Atta boy, <span class="name">Dave</span>.</p>
+				<p>Female - <span class="name"><span class="name">LaQuisha</span></span>. 16 years old. Highschooler with a desire to be a singer. <span class="name">LaQuisha</span> write songs and poems. She current does not have a stable place since she moves around a lot. She wants a place to store her lyrical masterpieces online so they don’t get lost as she goes here and there. Write on, <span class="name">LaQuisha</span>.</p>
+				<p class="lead">Site <span class="name">Scenarios</span>.</p>
+					<ol>
+						<li>Grade my final website/follow my commits and changes</li>
+						<li>Keep a journal</li>
+						<li>Change their settings</li>
+						<li>Create an account</li>
+						<li>Edit/Create new entries on their journal</li>
+						<li>Delete their account (Don't be that guy)</li>
+					</ol>
+				<p class="lead">Site <span class="name">Map</span>.</p>
+				<p>Oh, its beautiful. <a href="http://iammenasco.com/images/sitemap.pdf">Check it out here</a>.</p>
+				<p class="lead">Site <span class="name">Assets</span>.</p>
+				<p>I literally have no idea what you are talking about here. So here is a list of every file to make my site possible.</p>
+				<img src="http://iammenasco.com/images/asset.png" alt="List of Assets" height="500">
+				<p class="lead">Style<span class="name">Guide</span>.</p>
+				<p>Typography - Helvetica at various sizes, boldness, and colors.</p>
+				<p>Color - Default is #369DDA on a blackish background. Can be changed to various colors (See ‘theme’ in the Asset List)</p>
+				<p>Navigation - Left Nav that is always there, unless you are looking at this from a phone. Then its hidden… but still there.</p>
+				<p>Responsive - Yes. Large screen is the full experience. Tablet is the full experience, just smaller. Phone is a condensed experience. Entries will change the most on these different views. Instead of being side by side, they will be stacked with the Nav hidden and accessible upon toggle.</p>
+			</div>
+			<div class="pure-u-1">
+				{$footer}
+			</div>
+		</div>
+	</div>
+HTML;
+}
+/************
+Site Plan Page
 **** END ****/
 
 /**** START ****
@@ -1172,7 +1236,7 @@ function createFooter() {
 	<div class="mastfoot">
 		<div class="inner">
 			<p>See more on my <a title="Visit my Portfolio" href="http://portfolio.iammenasco.com">Portfolio</a>, by <a title="Get updates on Twitter" href="https://twitter.com/iammenasco">@iammenasco</a>.</p>
-			<a title="View my teaching presentations" href="http://beta.iammenasco.com/foreach">Teaching Presentation! </a>
+			<a title="View my site plan" href="?page=plan">Site Plan! </a>
 			<a title="These guys make this possible" href="http://www.arvixe.com" target="_blank">Hosted By Arvixe</a>
 		</div>
 	</div>

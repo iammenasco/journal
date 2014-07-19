@@ -2,7 +2,7 @@
 if (is_readable('../model/model.php')) {
 	require '../model/model.php';
 } else {
-	header('location: /errordocs/500.php');
+	echo '<h3 class="settingsHeading">No <span class="name">Results</span>.</h3>';
 }
 $allUsers = selectNames();
 foreach ($allUsers as $user) {
